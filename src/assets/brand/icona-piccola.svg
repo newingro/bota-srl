@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Variante semplificata per favicon 16-32 px -->
+  <g fill="none" stroke="#0b0341" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 97 20 6M29 97 31 14" stroke-width="6"/>
+    <path d="M17.5 78 29.5 64M18.5 52 30.2 38M19.4 28 30.8 16" stroke-width="4"/>
+    <path d="M20 6 80 12" stroke-width="6"/>
+    <path d="M20 6 6 26" stroke-width="5"/>
+    <path d="M77 12v12" stroke-width="4"/>
+  </g>
+  <rect x="38" y="30" width="34" height="67" fill="#eb0c0e"/>
+  <rect x="74" y="54" width="24" height="43" fill="#eb0c0e"/>
+  <g fill="#fff">
+    <rect x="43" y="37" width="9" height="10"/><rect x="58" y="37" width="9" height="10"/>
+    <rect x="43" y="55" width="9" height="10"/><rect x="58" y="55" width="9" height="10"/>
+    <rect x="43" y="73" width="9" height="10"/><rect x="58" y="73" width="9" height="10"/>
+    <rect x="80" y="61" width="12" height="9"/><rect x="80" y="77" width="12" height="9"/>
+  </g>
+</svg>

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
   <defs>
     <pattern id="bugnato" width="120" height="50" patternUnits="userSpaceOnUse"><rect width="120" height="50" fill="#cbbfae"/><path d="M0 48h120M60 0v24M0 24h120M120 24v24M0 24v24" stroke="#a89a86" stroke-width="4"/></pattern>
-    <pattern id="net" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#e8742f" opacity=".15"/><path d="M0 0l14 14M14 0L0 14" stroke="#e8742f" stroke-width=".8" opacity=".4"/></pattern>
+    <pattern id="net" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#eb0c0e" opacity=".12"/><path d="M0 0l14 14M14 0L0 14" stroke="#eb0c0e" stroke-width=".8" opacity=".35"/></pattern>
   </defs>
   <rect width="1200" height="900" fill="#dfe8ec"/>
   <!-- facciata vecchia (destra) e nuova (sinistra) -->
@@ -34,6 +34,6 @@
   <g fill="#c08a4e"><rect x="615" y="300" width="550" height="14"/><rect x="615" y="580" width="550" height="14"/></g>
   <g stroke="#59626a" stroke-width="3"><path d="M630 314l180 266M810 314l180 266M990 314l160 266"/></g>
   <!-- rullo -->
-  <g><rect x="520" y="250" width="110" height="34" rx="10" fill="#b4441a"/><path d="M630 267h22v60h-70v40" fill="none" stroke="#59626a" stroke-width="8" stroke-linejoin="round"/><rect x="570" y="360" width="24" height="110" rx="8" fill="#2a3338"/></g>
+  <g><rect x="520" y="250" width="110" height="34" rx="10" fill="#eb0c0e"/><path d="M630 267h22v60h-70v40" fill="none" stroke="#59626a" stroke-width="8" stroke-linejoin="round"/><rect x="570" y="360" width="24" height="110" rx="8" fill="#2a3338"/></g>
   <rect y="820" width="1200" height="80" fill="#ddd5ca"/>
 </svg>

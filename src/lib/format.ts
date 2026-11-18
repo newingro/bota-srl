@@ -11,7 +11,7 @@ import { escapeHtml } from './security';
 export function formatText(src: string, opts: { email?: boolean } = {}) {
   const pStyle = opts.email ? ' style="margin:0 0 14px;"' : '';
   const ulStyle = opts.email ? ' style="margin:0 0 14px;padding-left:20px;"' : '';
-  const aStyle = opts.email ? ' style="color:#a63d15;"' : '';
+  const aStyle = opts.email ? ' style="color:#d40b0d;"' : '';
   const inline = (s: string) =>
     escapeHtml(s)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')

@@ -6,12 +6,12 @@ const SITE = () => (process.env.SITE_URL || 'https://bota.srl').replace(/\/$/, '
 const ADMIN = () => (process.env.ADMIN_URL || `${SITE()}/admin`).replace(/\/$/, '');
 
 const C = {
-  ink: '#15191d',
-  muted: '#5c656e',
-  brand: '#a63d15',
-  stone: '#f4f1ec',
-  line: '#e3dcd2',
-  dark: '#1b2126',
+  ink: '#161632',
+  muted: '#5b5f7a',
+  brand: '#d40b0d',
+  stone: '#f3f4f8',
+  line: '#dcdfe9',
+  dark: '#0b0341',
 };
 
 function shell(opts: { preheader?: string; body: string; footer?: string }) {
@@ -22,11 +22,8 @@ ${opts.preheader ? `<div style="display:none;max-height:0;overflow:hidden;opacit
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.stone};">
 <tr><td align="center" style="padding:24px 12px;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid ${C.line};">
-    <tr><td style="background:${C.dark};padding:20px 28px;">
-      <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-        <td style="width:36px;height:36px;background:#b4441a;border-radius:8px;text-align:center;vertical-align:middle;color:#fff;font-weight:800;font-size:18px;">B</td>
-        <td style="padding-left:12px;color:#ffffff;font-size:20px;font-weight:800;letter-spacing:-0.3px;">BOTA <span style="font-size:12px;font-weight:600;color:#c9d0d6;">s.r.l. · Impresa edile</span></td>
-      </tr></table>
+    <tr><td style="background:#ffffff;padding:18px 28px 14px;border-bottom:4px solid ${C.dark};">
+      <img src="${SITE()}/logo.png" width="180" height="60" alt="Bota s.r.l. Impresa edile" style="display:block;border:0;width:180px;height:auto;">
     </td></tr>
     <tr><td style="padding:32px 28px 8px;font-size:16px;line-height:1.6;">${opts.body}</td></tr>
     <tr><td style="padding:24px 28px 28px;border-top:1px solid ${C.line};font-size:13px;line-height:1.6;color:${C.muted};">
@@ -91,7 +88,7 @@ export function leadNotification(l: LeadData) {
       ['Pagina di provenienza', l.source_page],
       ['Campagna', l.utm],
     ])}
-    <p style="margin:0 0 6px;">${button(tel, 'Chiama ora')}${button(`mailto:${l.email}`, 'Rispondi via email', C.dark)}${button(`${ADMIN()}/richieste/${l.id}`, 'Apri nel gestionale', '#5c656e')}</p>
+    <p style="margin:0 0 6px;">${button(tel, 'Chiama ora')}${button(`mailto:${l.email}`, 'Rispondi via email', C.dark)}${button(`${ADMIN()}/richieste/${l.id}`, 'Apri nel gestionale', '#5b5f7a')}</p>
     <p style="font-size:13px;color:${C.muted};">Al cliente è stata inviata in automatico una email di conferma di ricezione.</p>`;
   return {
     subject,
@@ -165,7 +162,7 @@ export function campaignEmail(c: CampaignData, unsubscribeToken: string) {
   const unsub = `${SITE()}/newsletter/disiscrizione/?t=${encodeURIComponent(unsubscribeToken)}`;
   const expiry = c.coupon_expiry ? new Date(c.coupon_expiry).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
   const coupon = c.coupon_code
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 22px;"><tr><td style="border:2px dashed ${C.brand};border-radius:14px;padding:20px;text-align:center;background:#fdf4ef;">
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:8px 0 22px;"><tr><td style="border:2px dashed ${C.brand};border-radius:14px;padding:20px;text-align:center;background:#fff1f1;">
         <p style="margin:0 0 4px;font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${C.brand};">Il tuo coupon</p>
         <p style="margin:0 0 6px;font-size:30px;font-weight:800;letter-spacing:2px;font-family:'Courier New',monospace;">${e(c.coupon_code)}</p>
         ${c.coupon_text ? `<p style="margin:0 0 4px;font-size:15px;">${e(c.coupon_text)}</p>` : ''}

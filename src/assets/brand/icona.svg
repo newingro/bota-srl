@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Icona Bota: gru blu e palazzi rossi (ridisegno vettoriale del marchio) -->
+  <g fill="#eb0c0e">
+    <rect x="2" y="76" width="13" height="3.4" rx=".6"/><rect x="2" y="81.5" width="13" height="3.4" rx=".6"/>
+    <rect x="2" y="87" width="13" height="3.4" rx=".6"/><rect x="2" y="92.5" width="13" height="3.4" rx=".6"/>
+  </g>
+  <g fill="none" stroke="#0b0341" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M18.5 97 21.5 6M28.5 97 30.5 12" stroke-width="3.2"/>
+    <path d="M18.8 88 28.7 80M19.1 79 28.9 71M19.4 70 29.2 62M19.7 61 29.5 53M20 52 29.8 44M20.3 43 30 35M20.6 34 30.2 26M20.9 25 30.4 17" stroke-width="2"/>
+    <path d="M21.5 6 78 11M30.5 17 78 17" stroke-width="3.2"/>
+    <path d="M30.5 7 34 17 38 8 42 17 46 8.8 50 17 54 9.3 58 17 62 9.8 66 17 70 10.4 74 17" stroke-width="1.8"/>
+    <path d="M21.5 6 6 27M24 15 9.5 29" stroke-width="2.6"/>
+    <path d="M7 27.5 10 30" stroke-width="2"/>
+    <path d="M76 17v6" stroke-width="2"/>
+  </g>
+  <rect x="73" y="22.5" width="6" height="3" rx=".6" fill="#0b0341"/>
+  <!-- palazzo alto -->
+  <rect x="37" y="27" width="35" height="70" fill="#eb0c0e"/>
+  <path d="M72 27h5v70h-5z" fill="#b8090b"/>
+  <g fill="#fff">
+    <rect x="41" y="32" width="6" height="7"/><rect x="51.5" y="32" width="6" height="7"/><rect x="62" y="32" width="6" height="7"/>
+    <rect x="41" y="43" width="6" height="7"/><rect x="51.5" y="43" width="6" height="7"/><rect x="62" y="43" width="6" height="7"/>
+    <rect x="41" y="54" width="6" height="7"/><rect x="51.5" y="54" width="6" height="7"/><rect x="62" y="54" width="6" height="7"/>
+    <rect x="41" y="65" width="6" height="7"/><rect x="51.5" y="65" width="6" height="7"/><rect x="62" y="65" width="6" height="7"/>
+    <rect x="41" y="76" width="6" height="7"/><rect x="51.5" y="76" width="6" height="7"/><rect x="62" y="76" width="6" height="7"/>
+    <rect x="41" y="87" width="6" height="7"/><rect x="51.5" y="87" width="6" height="7"/><rect x="62" y="87" width="6" height="7"/>
+  </g>
+  <!-- palazzo basso -->
+  <rect x="77" y="52" width="21" height="45" fill="#eb0c0e"/>
+  <g fill="#fff">
+    <rect x="80.5" y="57" width="5.5" height="6.5"/><rect x="89.5" y="57" width="5.5" height="6.5"/>
+    <rect x="80.5" y="67.5" width="5.5" height="6.5"/><rect x="89.5" y="67.5" width="5.5" height="6.5"/>
+    <rect x="80.5" y="78" width="5.5" height="6.5"/><rect x="89.5" y="78" width="5.5" height="6.5"/>
+    <rect x="80.5" y="88.5" width="5.5" height="6.5"/><rect x="89.5" y="88.5" width="5.5" height="6.5"/>
+  </g>
+</svg>

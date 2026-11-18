@@ -1,36 +1,38 @@
 /* ==========================================================================
    Bota s.r.l. — design system
-   Palette: pietra/intonaco caldo + cotto toscano + ardesia
+   Palette dal logo: blu notte #0B0341 + rosso #EB0C0E
    ========================================================================== */
 :root {
-  --ink: #15191d;
-  --ink-2: #333b42;
-  --muted: #5c656e;
-  --stone: #f4f1ec;
-  --stone-2: #ebe5dc;
-  --line: #ddd5ca;
+  --ink: #161632;
+  --ink-2: #3a3b55;
+  --muted: #5b5f7a;
+  --stone: #f3f4f8;
+  --stone-2: #e7e9f1;
+  --line: #dcdfe9;
   --white: #ffffff;
-  --brand: #b4441a;
-  --brand-strong: #a63d15;
-  --brand-hover: #8f3412;
-  --brand-soft: #f7e3d9;
-  --dark: #1b2126;
-  --dark-2: #242c32;
+  --brand: #eb0c0e;
+  --brand-strong: #d40b0d;
+  --brand-hover: #a8080a;
+  --brand-soft: #fde7e7;
+  --brand-deep: #c40a0c;
+  --dark: #0b0341;
+  --dark-2: #16124f;
   --on-dark: #ffffff;
-  --on-dark-muted: #c9d0d6;
-  --accent-on-dark: #f08a5d;
+  --on-dark-muted: #c9cbe6;
+  --dark-line: #2a2670;
+  --accent-on-dark: #ff7a7c;
   --ok: #2f6b3f;
   --error: #b42318;
 
   --font: var(--font-archivo), Arial, sans-serif;
   --radius: 14px;
   --radius-sm: 8px;
-  --shadow: 0 1px 2px rgb(21 25 29 / 6%), 0 8px 24px rgb(21 25 29 / 8%);
-  --shadow-lg: 0 2px 4px rgb(21 25 29 / 6%), 0 24px 48px rgb(21 25 29 / 14%);
+  --shadow: 0 1px 2px rgb(11 3 65 / 6%), 0 8px 24px rgb(11 3 65 / 8%);
+  --shadow-lg: 0 2px 4px rgb(11 3 65 / 6%), 0 24px 48px rgb(11 3 65 / 14%);
   --container: 1200px;
   --gutter: clamp(1rem, 4vw, 2rem);
   --section: clamp(3.5rem, 8vw, 6.5rem);
-  --header-h: 72px;
+  --header-h: 76px;
 }
 
 *,
@@ -460,7 +462,7 @@ strong {
   width: 100%;
   min-height: 50px;
   padding: 0.75rem 0.9rem;
-  border: 1.5px solid #b9b0a3;
+  border: 1.5px solid #858aa3;
   border-radius: var(--radius-sm);
   background: var(--white);
   color: var(--ink);
@@ -486,7 +488,7 @@ strong {
 .textarea:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgb(180 68 26 / 22%);
+  box-shadow: 0 0 0 3px rgb(235 12 14 / 22%);
 }
 .input[aria-invalid='true'],
 .select[aria-invalid='true'],

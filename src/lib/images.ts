@@ -2,7 +2,7 @@ import sharp from 'sharp';
 import { putFile, deleteFiles } from './storage';
 import { randomToken } from './security';
 
-export const IMAGE_WIDTHS = [480, 960, 1600];
+export const IMAGE_WIDTHS = [480, 720, 1080, 1600];
 export type Variant = { w: number; h: number; url: string };
 
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -10,7 +10,7 @@ const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/h
 
 /**
  * Elabora una foto caricata: corregge l'orientamento EXIF, rimuove i metadati (anche GPS),
- * genera 3 formati WebP ottimizzati (480/960/1600 px) per immagini responsive veloci.
+ * genera 4 formati WebP ottimizzati (480/720/1080/1600 px) per immagini responsive veloci.
  */
 export async function processUpload(file: File, folder = 'lavori') {
   if (!ALLOWED.includes(file.type) && !/\.(jpe?g|png|webp|avif|heic)$/i.test(file.name)) {
@@ -29,7 +29,7 @@ export async function processUpload(file: File, folder = 'lavori') {
     const { data, info } = await sharp(input, { failOn: 'none' })
       .rotate()
       .resize({ width: w, withoutEnlargement: true })
-      .webp({ quality: 78, effort: 4 })
+      .webp({ quality: 72, effort: 5, smartSubsample: true })
       .toBuffer({ resolveWithObject: true });
     const url = await putFile(`${id}-${info.width}.webp`, data, 'image/webp');
     variants.push({ w: info.width, h: info.height, url });

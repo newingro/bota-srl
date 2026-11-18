@@ -3,19 +3,19 @@
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe8ec"/><stop offset="1" stop-color="#f4f1ec"/></linearGradient>
     <pattern id="tiles" width="34" height="18" patternUnits="userSpaceOnUse"><rect width="34" height="18" fill="#b4441a"/><path d="M0 17h34" stroke="#8f3412" stroke-width="2"/><path d="M17 0v17" stroke="#9c3a15" stroke-width="1.2" opacity=".6"/></pattern>
     <pattern id="tiles2" width="30" height="16" patternUnits="userSpaceOnUse"><rect width="30" height="16" fill="#c2522a"/><path d="M0 15h30" stroke="#8f3412" stroke-width="2"/></pattern>
-    <pattern id="net" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#e8742f" opacity=".18"/><path d="M0 0l14 14M14 0L0 14" stroke="#e8742f" stroke-width=".8" opacity=".45"/></pattern>
+    <pattern id="net" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#eb0c0e" opacity=".14"/><path d="M0 0l14 14M14 0L0 14" stroke="#eb0c0e" stroke-width=".8" opacity=".4"/></pattern>
   </defs>
   <rect width="1200" height="900" fill="url(#sky)"/>
   <circle cx="985" cy="170" r="70" fill="#f6dccb"/>
   <!-- gru -->
-  <g stroke="#9aa3aa" stroke-width="5" fill="none">
+  <g stroke="#3d3a7a" stroke-width="5" fill="none">
     <path d="M790 640V95"/><path d="M820 640V95"/>
     <path d="M790 120l30-25M790 170l30-50M790 220l30-50M790 270l30-50M790 320l30-50M790 370l30-50M790 420l30-50M790 470l30-50M790 520l30-50M790 570l30-50M790 620l30-50"/>
     <path d="M560 95h560"/><path d="M560 125h560"/><path d="M805 95l-30-45h60z"/>
     <path d="M600 95l30 30 30-30 30 30 30-30 30 30M840 95l30 30 30-30 30 30 30-30 30 30 30-30 30 30"/>
     <path d="M1040 125v190" stroke-width="3"/>
   </g>
-  <rect x="1020" y="310" width="40" height="26" fill="#b4441a"/>
+  <rect x="1020" y="310" width="40" height="26" fill="#eb0c0e"/>
   <!-- colline -->
   <path d="M0 560C150 470 300 455 460 505s330 25 470-25 220-35 270-10V900H0Z" fill="#cdd6c2"/>
   <path d="M0 640c180-70 380-60 560-20s420 30 640-30V900H0Z" fill="#b9c6ad"/>

@@ -1,6 +1,6 @@
 /* Gestionale Bota — stile area riservata */
 body.admin {
-  background: #f3f1ed;
+  background: #f1f2f7;
   font-size: 0.975rem;
 }
 .adm {
@@ -28,10 +28,10 @@ body.admin {
   gap: 0.35rem;
   padding: 0.25rem 0.6rem 1.25rem;
   margin-bottom: 0.75rem;
-  border-bottom: 1px solid #36424b;
+  border-bottom: 1px solid #2a2670;
   text-decoration: none;
 }
-.adm__brand svg {
+.adm__brand img {
   width: 150px;
   height: auto;
 }
@@ -83,7 +83,7 @@ body.admin {
   display: grid;
   gap: 0.25rem;
   padding-top: 1rem;
-  border-top: 1px solid #36424b;
+  border-top: 1px solid #2a2670;
 }
 .adm__side-foot a,
 .adm__side-foot button {
@@ -269,7 +269,7 @@ a.kpi:hover {
   white-space: nowrap;
 }
 .table tbody tr:hover {
-  background: #faf8f5;
+  background: #f7f8fb;
 }
 .table a {
   font-weight: 650;
@@ -317,8 +317,8 @@ a.kpi:hover {
   color: var(--ok);
 }
 .pill--muted {
-  background: #eceae6;
-  color: #59616a;
+  background: #eceef4;
+  color: #555a75;
 }
 .toolbar {
   display: flex;
@@ -361,7 +361,7 @@ a.kpi:hover {
 .btn--danger {
   --btn-bg: transparent;
   --btn-fg: var(--error);
-  --btn-bd: #e9b9b4;
+  --btn-bd: #f0b4b5;
 }
 .btn--danger:hover {
   --btn-bg: var(--error);
@@ -460,9 +460,9 @@ a.kpi:hover {
   place-items: center;
   gap: 0.5rem;
   padding: 1.75rem 1rem;
-  border: 2px dashed #c9bfb1;
+  border: 2px dashed #b9bdd0;
   border-radius: var(--radius);
-  background: #faf8f5;
+  background: #f7f8fb;
   text-align: center;
   color: var(--ink-2);
   cursor: pointer;
@@ -490,10 +490,12 @@ a.kpi:hover {
   padding: 2rem;
   box-shadow: var(--shadow-lg);
 }
-.login__box svg {
-  width: 160px;
-  height: auto;
+.login__box .logo {
   margin-bottom: 1.25rem;
+}
+.login__box img {
+  width: 180px;
+  height: auto;
 }
 .login__box h1 {
   font-size: 1.5rem;

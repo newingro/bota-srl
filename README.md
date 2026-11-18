@@ -104,6 +104,7 @@ Se il cliente preferisce comunque avere i testi "garantiti" da un fornitore, si 
 
 ## Da personalizzare
 
-- **Logo**: `src/components/Logo.astro` (ora è un logo provvisorio) e `scripts/generate-assets.mjs` per favicon/immagine social.
+- **Logo e favicon**: logo ufficiale in `src/assets/brand/` (originale + versione con fondo bianco) e `public/brand/`; la favicon è il ridisegno vettoriale di gru e palazzi (`src/assets/brand/icona.svg`, variante semplificata `icona-piccola.svg` per 16–32 px). Dopo una modifica: `npm run assets`.
+- **Palette** (dal logo): blu notte `#0B0341`, rosso `#EB0C0E` (pulsanti e link usano `#D40B0D`, più scuro, per il contrasto AA). Tutti i colori sono variabili CSS in `src/styles/global.css`.
 - **Foto del sito**: sostituire i file in `src/assets/img/` (sono illustrazioni segnaposto; i sorgenti SVG sono in `sorgenti/`).
 - **Dati aziendali, orari, social, WhatsApp**: `src/config/site.ts`. **Testi dei servizi**: `src/data/services.ts`.
