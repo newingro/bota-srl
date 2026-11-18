@@ -93,13 +93,22 @@ Se il cliente preferisce comunque avere i testi "garantiti" da un fornitore, si 
 - Accessibilità: contrasti AA, navigazione da tastiera, skip link, label su tutti i campi, errori annunciati agli screen reader, `prefers-reduced-motion`.
 - Prestazioni: CSS inline, un solo font variabile (35 KB) precaricato, immagini AVIF/WebP responsive, ~10 KB di JavaScript totale, home statica con la sezione lavori caricata come *server island*.
 
+## Preview su Vercel (modalità demo)
+
+Se su Vercel non è configurato un database (`DATABASE_URL` / `TURSO_DATABASE_URL`), il sito parte in **modalità demo**:
+usa una copia del database di esempio (`demo/bota-demo.db`, foto in `public/demo/`), il gestionale mostra un avviso,
+le email non vengono spedite e le modifiche non sono permanenti. Gli indirizzi `*.vercel.app` inviano `X-Robots-Tag: noindex`.
+Per aggiornare i dati demo: `npm run seed:demo && npm run demo:snapshot`.
+
+Per renderla definitiva basta collegare **Turso** (Vercel → progetto → Storage → Turso) e uno store **Blob**: le variabili vengono create in automatico e la modalità demo si disattiva da sola.
+
 ## Messa online (dopo la conferma del cliente)
 
 1. **Turso**: crea il database → `DATABASE_URL` e `DATABASE_AUTH_TOKEN`.
 2. **Vercel**: importa il progetto, imposta le variabili di `.env.example`, crea uno store **Blob** (`BLOB_READ_WRITE_TOKEN`). Nota: per uso commerciale serve un team Vercel Pro (in alternativa il sito gira su qualsiasi server Node con `npm run build && node dist/server/entry.mjs`).
 3. **Email**: parametri SMTP della casella info@bota.srl (o Resend con record SPF/DKIM sul dominio).
 4. **Domini**: `bota.srl` e `admin.bota.srl` sullo stesso progetto (il `vercel.json` instrada admin.bota.srl verso il gestionale), `www` → redirect.
-5. Crea gli utenti reali con `npm run admin:create` puntando al DB di produzione e **rimuovi i dati di esempio** con `npm run reset:demo`.
+5. Crea gli utenti reali con `npm run admin:create` puntando al DB di produzione, **rimuovi i dati di esempio** con `npm run reset:demo` e cancella le cartelle `demo/` e `public/demo/`.
 6. Google: Search Console + invio sitemap, GA4 (`PUBLIC_GA_ID`), conversione Google Ads sulla pagina grazie (`PUBLIC_GADS_ID`, `PUBLIC_GADS_CONVERSION_LABEL`), Profilo dell'Attività su Google con link al sito; Meta Pixel (`PUBLIC_META_PIXEL_ID`) e link alla pagina Facebook in `src/config/site.ts`.
 
 ## Da personalizzare

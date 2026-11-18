@@ -61,5 +61,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.headers.set('X-Frame-Options', 'SAMEORIGIN');
+  // Anteprime (*.vercel.app): mai indicizzate, per non creare duplicati del sito ufficiale
+  if (host.endsWith('.vercel.app')) res.headers.set('X-Robots-Tag', 'noindex, nofollow');
   return res;
 });

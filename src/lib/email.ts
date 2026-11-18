@@ -60,11 +60,12 @@ export async function sendMail(mail: Mail): Promise<{ ok: boolean; error?: strin
       });
       if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
     } else {
-      mkdirSync('.data/outbox', { recursive: true });
+      const dir = process.env.VERCEL ? '/tmp/outbox' : '.data/outbox';
+      mkdirSync(dir, { recursive: true });
       const name = `${new Date().toISOString().replace(/[:.]/g, '-')}-${mail.to.replace(/[^a-z0-9]/gi, '_')}`;
-      writeFileSync(`.data/outbox/${name}.html`, mail.html);
+      writeFileSync(`${dir}/${name}.html`, mail.html);
       writeFileSync(
-        `.data/outbox/${name}.json`,
+        `${dir}/${name}.json`,
         JSON.stringify({ from: MAIL_FROM, to: mail.to, subject: mail.subject, replyTo: mail.replyTo, headers: mail.headers }, null, 2),
       );
       console.info(`[email:outbox] ${mail.subject} → ${mail.to}`);

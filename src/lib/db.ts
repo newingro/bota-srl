@@ -1,19 +1,35 @@
 import { createClient, type Client, type InValue } from '@libsql/client';
-import { mkdirSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
  * Database libSQL/SQLite.
  * - In locale: file `.data/bota.db` (nessuna configurazione necessaria).
- * - In produzione: Turso (DATABASE_URL=libsql://... + DATABASE_AUTH_TOKEN).
+ * - In produzione: Turso (DATABASE_URL / DATABASE_AUTH_TOKEN, oppure le variabili
+ *   TURSO_DATABASE_URL / TURSO_AUTH_TOKEN create dall'integrazione Turso di Vercel).
+ * - Preview su Vercel senza database: MODALITÀ DEMO. Copia del database di esempio
+ *   (demo/bota-demo.db) nella cartella temporanea: tutto funziona, ma le modifiche
+ *   non sono permanenti.
  */
 let client: Client | null = null;
 let migrated: Promise<void> | null = null;
 
+const remoteUrl = () => process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL || '';
+export const isDemoMode = () => !remoteUrl() && !!process.env.VERCEL;
+
 function getClient(): Client {
   if (client) return client;
-  const url = process.env.DATABASE_URL || 'file:.data/bota.db';
-  if (url.startsWith('file:')) mkdirSync('.data', { recursive: true });
-  client = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN });
+  let url = remoteUrl();
+  if (!url && process.env.VERCEL) {
+    const target = '/tmp/bota-demo.db';
+    if (!existsSync(target)) copyFileSync(join(process.cwd(), 'demo/bota-demo.db'), target);
+    url = `file:${target}`;
+  }
+  if (!url) {
+    mkdirSync('.data', { recursive: true });
+    url = 'file:.data/bota.db';
+  }
+  client = createClient({ url, authToken: process.env.DATABASE_AUTH_TOKEN || process.env.TURSO_AUTH_TOKEN });
   return client;
 }
 

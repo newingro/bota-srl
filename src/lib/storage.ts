@@ -6,7 +6,7 @@ import { dirname, join, normalize } from 'node:path';
  * - Produzione su Vercel: Vercel Blob (variabile BLOB_READ_WRITE_TOKEN).
  * - Locale / server proprio: cartella .data/uploads servita da /media/...
  */
-const LOCAL_DIR = process.env.UPLOADS_DIR || '.data/uploads';
+const LOCAL_DIR = process.env.UPLOADS_DIR || (process.env.VERCEL ? '/tmp/uploads' : '.data/uploads');
 
 export function storageMode() {
   return process.env.BLOB_READ_WRITE_TOKEN ? 'blob' : 'local';

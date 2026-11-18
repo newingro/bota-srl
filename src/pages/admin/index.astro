@@ -1,7 +1,7 @@
 ---
 import Admin from '../../layouts/Admin.astro';
 import Icon from '../../components/Icon.astro';
-import { all, get } from '../../lib/db';
+import { all, get, isDemoMode } from '../../lib/db';
 import { ahref, statusLabel } from '../../lib/admin';
 import { formatDate } from '../../lib/format';
 import { mailMode } from '../../lib/email';
@@ -99,7 +99,7 @@ const maxS = Math.max(1, ...byService.map((s) => Number(s.n)));
         <dl class="dl sys">
           <dt>Invio email</dt><dd>{mailMode() === 'outbox' ? 'Modalità prova (non inviate)' : mailMode() === 'smtp' ? 'SMTP attivo' : 'Resend attivo'}</dd>
           <dt>Archivio foto</dt><dd>{storageMode() === 'blob' ? 'Vercel Blob' : 'Disco locale'}</dd>
-          <dt>Database</dt><dd>{process.env.DATABASE_URL?.startsWith('libsql') ? 'Turso (cloud)' : 'Locale (SQLite)'}</dd>
+          <dt>Database</dt><dd>{isDemoMode() ? 'Demo (non permanente)' : process.env.DATABASE_URL || process.env.TURSO_DATABASE_URL ? 'Turso (cloud)' : 'Locale (SQLite)'}</dd>
         </dl>
       </section>
     </aside>

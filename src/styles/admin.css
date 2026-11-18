@@ -178,6 +178,11 @@ body.admin {
   background: #e7f3ea;
   color: var(--ok);
 }
+.adm-flash--demo {
+  background: #fff4d6;
+  color: #5c3d00;
+  font-weight: 500;
+}
 .adm-flash--err {
   background: #fdecea;
   color: var(--error);

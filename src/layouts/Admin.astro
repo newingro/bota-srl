@@ -5,7 +5,7 @@ import '../styles/admin.css';
 import Icon from '../components/Icon.astro';
 import Logo from '../components/Logo.astro';
 import { ahref, flashMessages } from '../lib/admin';
-import { get } from '../lib/db';
+import { get, isDemoMode } from '../lib/db';
 
 interface Props {
   title: string;
@@ -84,6 +84,11 @@ const siteUrl = process.env.SITE_URL || '/';
               <div class="adm__top-actions"><slot name="actions" /></div>
               {user && <span class="adm__user"><Icon name="user" size={18} /> {user.name || user.email}</span>}
             </header>
+            {isDemoMode() && (
+              <p class="adm-flash adm-flash--demo">
+                <strong>Modalità demo:</strong> dati di esempio. Puoi provare tutte le funzioni, ma le modifiche non sono permanenti e le email non vengono spedite.
+              </p>
+            )}
             {flash && flashMessages[flash] && <p class="adm-flash adm-flash--ok" role="status">{flashMessages[flash]}</p>}
             {err && <p class="adm-flash adm-flash--err" role="alert">{err}</p>}
             <main class="adm__content">
