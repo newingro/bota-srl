@@ -1,0 +1,55 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import { all, get } from '../../../lib/db';
+import { ahref } from '../../../lib/admin';
+import { formatDate } from '../../../lib/format';
+
+export const prerender = false;
+const campaigns = await all('SELECT * FROM campaigns ORDER BY created_at DESC');
+const confirmed = Number((await get<{ n: number }>("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'confirmed'"))?.n ?? 0);
+const label: Record<string, [string, string]> = { draft: ['Bozza', 'muted'], sending: ['In invio', 'warn'], sent: ['Inviata', 'ok'] };
+---
+
+<Admin title="Campagne e coupon" section="campagne">
+  <a slot="actions" class="btn btn--sm" href={ahref(Astro, '/campagne/nuova')}><Icon name="plus" size={18} /> Nuova campagna</a>
+  <p class="help intro"><Icon name="users" size={16} /> {confirmed} iscritti confermati riceveranno le campagne.</p>
+  <section class="panel">
+    {
+      campaigns.length ? (
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Oggetto</th><th>Coupon</th><th>Stato</th><th class="num">Inviate</th><th>Data</th></tr></thead>
+            <tbody>
+              {campaigns.map((c) => {
+                const [l, t] = label[String(c.status)] ?? ['–', 'muted'];
+                return (
+                  <tr>
+                    <td><a href={ahref(Astro, `/campagne/${c.id}`)}>{c.subject}</a></td>
+                    <td>{c.coupon_code ? <code>{c.coupon_code}</code> : '–'}</td>
+                    <td><span class={`pill pill--${t}`}>{l}</span></td>
+                    <td class="num">{c.status === 'sent' ? `${c.sent_count}${Number(c.failed_count) ? ` (+${c.failed_count} errori)` : ''}` : '–'}</td>
+                    <td class="nowrap">{formatDate(String(c.sent_at || c.created_at), true)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>Nessuna campagna. Crea la prima email con un’offerta o un coupon per i tuoi iscritti.</p>
+          <a class="btn" href={ahref(Astro, '/campagne/nuova')}><Icon name="plus" /> Nuova campagna</a>
+        </div>
+      )
+    }
+  </section>
+</Admin>
+<style>
+  .intro {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    margin: 0 0 1rem;
+  }
+</style>

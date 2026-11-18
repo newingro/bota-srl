@@ -1,0 +1,19 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Base title="Pagina non trovata" description="La pagina che cerchi non esiste o è stata spostata." noindex>
+  <section class="section">
+    <div class="container container--narrow">
+      <p class="eyebrow">Errore 404</p>
+      <h1>Questa pagina non esiste (più)</h1>
+      <p class="lead">Forse è stata spostata durante il rinnovo del sito. Ecco da dove puoi ripartire:</p>
+      <div class="btn-row">
+        <a class="btn" href="/">Home page <Icon name="arrow" /></a>
+        <a class="btn btn--ghost" href="/servizi/">Servizi</a>
+        <a class="btn btn--ghost" href="/contatti/#preventivo">Preventivo gratuito</a>
+      </div>
+    </div>
+  </section>
+</Base>

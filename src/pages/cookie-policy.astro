@@ -1,0 +1,149 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { company, legal } from '../config/site';
+
+const updated = new Date(legal.cookieVersion).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Cookie policy', path: '/cookie-policy/' },
+];
+
+type Row = { name: string; provider: string; purpose: string; duration: string; type: string };
+const groups: { id: string; title: string; legal: string; intro: string; rows: Row[]; link?: { href: string; label: string }[] }[] = [
+  {
+    id: 'necessari',
+    title: 'Strumenti tecnici necessari',
+    legal: 'Non richiedono consenso (art. 122, c. 1, Codice Privacy).',
+    intro: 'Servono a far funzionare il sito e a ricordare le tue scelte. Non vengono usati per altre finalità.',
+    rows: [
+      { name: 'bota_consent', provider: 'Bota s.r.l. (prima parte)', purpose: 'Memorizza le tue scelte sui cookie (identificativo casuale, versione, preferenze).', duration: '6 mesi', type: 'Cookie' },
+      { name: 'bota_admin', provider: 'Bota s.r.l. (prima parte)', purpose: 'Mantiene l’accesso all’area riservata del personale. Non viene mai impostato ai visitatori del sito.', duration: '7 giorni', type: 'Cookie' },
+      { name: 'bota_attr', provider: 'Bota s.r.l. (prima parte)', purpose: 'Ricorda la campagna da cui sei arrivato (es. utm, gclid) per allegarla alla richiesta di preventivo, solo se la invii.', duration: 'Fine sessione', type: 'sessionStorage' },
+      { name: 'bota_conv', provider: 'Bota s.r.l. (prima parte)', purpose: 'Evita di conteggiare due volte la stessa richiesta di preventivo.', duration: 'Fine sessione', type: 'sessionStorage' },
+    ],
+  },
+  {
+    id: 'esterni',
+    title: 'Contenuti esterni (mappe)',
+    legal: 'Attivati solo con il tuo consenso o quando clicchi “Mostra mappa interattiva”.',
+    intro: 'La mappa interattiva di Google Maps nella pagina Contatti viene caricata solo su tua richiesta: fino ad allora vedi un’anteprima che non contatta i server di Google.',
+    rows: [
+      { name: 'NID, AEC, SOCS e altri', provider: 'Google Ireland Ltd. (terza parte)', purpose: 'Funzionamento della mappa, preferenze e sicurezza; possono essere usati da Google anche per finalità proprie.', duration: 'Fino a 13 mesi', type: 'Cookie' },
+    ],
+    link: [{ href: 'https://policies.google.com/privacy?hl=it', label: 'Privacy policy di Google' }],
+  },
+  {
+    id: 'statistiche',
+    title: 'Statistiche',
+    legal: 'Attivati solo con il tuo consenso.',
+    intro: 'Usiamo Google Analytics 4 per capire in forma aggregata come viene usato il sito. L’indirizzo IP non viene registrato da Google Analytics 4.',
+    rows: [
+      { name: '_ga', provider: 'Google Ireland Ltd. (Google Analytics)', purpose: 'Distingue i visitatori in forma pseudonima.', duration: '2 anni', type: 'Cookie' },
+      { name: '_ga_<ID>', provider: 'Google Ireland Ltd. (Google Analytics)', purpose: 'Mantiene lo stato della sessione.', duration: '2 anni', type: 'Cookie' },
+    ],
+    link: [{ href: 'https://business.safety.google/privacy/', label: 'Informativa di Google sui dati dei servizi pubblicitari e di misurazione' }],
+  },
+  {
+    id: 'marketing',
+    title: 'Marketing',
+    legal: 'Attivati solo con il tuo consenso.',
+    intro: 'Servono a misurare l’efficacia delle nostre campagne (es. quante richieste di preventivo arrivano da un annuncio) e a mostrarti annunci pertinenti su altri siti e sui social.',
+    rows: [
+      { name: '_gcl_au, _gcl_aw', provider: 'Google Ireland Ltd. (Google Ads)', purpose: 'Misurazione delle conversioni degli annunci.', duration: '90 giorni', type: 'Cookie' },
+      { name: 'IDE, test_cookie', provider: 'Google Ireland Ltd. (doubleclick.net)', purpose: 'Pubblicità personalizzata e remarketing.', duration: 'Fino a 13 mesi', type: 'Cookie di terza parte' },
+      { name: '_fbp, fr', provider: 'Meta Platforms Ireland Ltd. (Meta Pixel)', purpose: 'Misurazione delle campagne su Facebook e Instagram e pubblicità personalizzata.', duration: '90 giorni', type: 'Cookie' },
+    ],
+    link: [
+      { href: 'https://policies.google.com/technologies/ads?hl=it', label: 'Come Google usa i cookie pubblicitari' },
+      { href: 'https://www.facebook.com/privacy/policies/cookies/', label: 'Cookie policy di Meta' },
+    ],
+  },
+];
+---
+
+<Base title="Cookie policy" description="Informativa sull'uso dei cookie e di altri strumenti di tracciamento sul sito bota.srl, con l'elenco dei cookie e le istruzioni per gestire il consenso." breadcrumbs={crumbs}>
+  <PageHero crumbs={crumbs} title="Cookie policy" lead={`Informativa sui cookie e sugli altri strumenti di tracciamento, ai sensi dell’art. 122 del Codice Privacy e delle Linee guida del Garante del 10 giugno 2021. Ultimo aggiornamento: ${updated}.`}>
+    <div class="btn-row pref-btn">
+      <button type="button" class="btn" data-cookie-preferences><Icon name="cookie" /> Modifica le preferenze cookie</button>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container">
+      <div class="prose">
+        <h2>Cosa sono i cookie</h2>
+        <p>
+          I cookie sono piccoli file di testo che i siti salvano sul tuo dispositivo per farlo funzionare, ricordare le tue preferenze o
+          raccogliere informazioni. Strumenti simili (come il localStorage/sessionStorage del browser o i “pixel”) funzionano in modo analogo e
+          sono trattati allo stesso modo in questa informativa. Il titolare è {company.legalName} (vedi la <a href="/privacy-policy/">privacy policy</a>).
+        </p>
+
+        <h2>Come gestiamo il tuo consenso</h2>
+        <ul>
+          <li>Al primo accesso ti mostriamo un banner: puoi <strong>accettare tutto</strong>, <strong>rifiutare tutto</strong> o <strong>scegliere per finalità</strong>. Chiudendo il banner con la “X” continui la navigazione con i soli strumenti tecnici.</li>
+          <li><strong>Nessuno strumento di terze parti viene caricato prima della tua scelta</strong>: Google Analytics, Google Ads, Meta Pixel e Google Maps sono bloccati in via preventiva e attivati solo per le finalità che hai accettato. Lo scorrimento della pagina o la navigazione non valgono come consenso.</li>
+          <li>Per i servizi Google adottiamo la <strong>Modalità di consenso (Consent Mode v2)</strong> in versione “base”: i segnali di consenso vengono trasmessi a Google solo dopo la tua scelta.</li>
+          <li>La scelta viene ricordata per <strong>6 mesi</strong>, trascorsi i quali (o in caso di modifiche sostanziali a questa informativa) il banner ti verrà riproposto.</li>
+          <li>Conserviamo una <strong>registrazione della tua scelta</strong> (identificativo casuale, data, preferenze, versione dell’informativa, indirizzo IP troncato e browser) per poter dimostrare il consenso, come richiesto dall’art. 7 GDPR.</li>
+          <li>Puoi <strong>modificare o revocare</strong> il consenso in qualsiasi momento con il pulsante qui sopra o con il link “Preferenze cookie” presente in fondo a ogni pagina. In caso di revoca eliminiamo i cookie di terze parti installati sul nostro dominio.</li>
+        </ul>
+
+        <h2>Elenco degli strumenti utilizzati</h2>
+        {
+          groups.map((g) => (
+            <section id={g.id}>
+              <h3>{g.title}</h3>
+              <p><em>{g.legal}</em> {g.intro}</p>
+              <table>
+                <thead>
+                  <tr><th scope="col">Nome</th><th scope="col">Fornitore</th><th scope="col">Finalità</th><th scope="col">Durata</th><th scope="col">Tipo</th></tr>
+                </thead>
+                <tbody>
+                  {g.rows.map((r) => (
+                    <tr><td><code>{r.name}</code></td><td>{r.provider}</td><td>{r.purpose}</td><td>{r.duration}</td><td>{r.type}</td></tr>
+                  ))}
+                </tbody>
+              </table>
+              {g.link && <p>{g.link.map((l, i) => (<>{i > 0 && ' · '}<a href={l.href} rel="noopener" target="_blank">{l.label}</a></>))}</p>}
+            </section>
+          ))
+        }
+
+        <h2>Trasferimento dei dati fuori dall’UE</h2>
+        <p>
+          Google e Meta possono trasferire dati negli Stati Uniti: tali trasferimenti avvengono sulla base dell’EU-U.S. Data Privacy Framework,
+          cui entrambe le società hanno aderito, e/o delle Clausole Contrattuali Standard.
+        </p>
+
+        <h2>Gestire i cookie dal browser</h2>
+        <p>
+          Oltre che dal nostro pannello, puoi cancellare o bloccare i cookie dalle impostazioni del browser:
+          <a href="https://support.google.com/chrome/answer/95647?hl=it" rel="noopener" target="_blank">Chrome</a>,
+          <a href="https://support.mozilla.org/it/kb/Attivare%20e%20disattivare%20i%20cookie" rel="noopener" target="_blank">Firefox</a>,
+          <a href="https://support.apple.com/it-it/guide/safari/sfri11471/mac" rel="noopener" target="_blank">Safari</a>,
+          <a href="https://support.microsoft.com/it-it/microsoft-edge/eliminare-i-cookie-in-microsoft-edge-63947406-40ac-c3b8-57b9-2a946a29ae09" rel="noopener" target="_blank">Edge</a>.
+          Bloccare i cookie tecnici può compromettere il funzionamento del sito. Per la pubblicità personalizzata puoi anche usare
+          <a href="https://www.youronlinechoices.com/it/" rel="noopener" target="_blank">Your Online Choices</a>.
+        </p>
+
+        <h2>Contatti</h2>
+        <p>Per qualsiasi domanda su questa informativa scrivi a <a href={`mailto:${company.email}`}>{company.email}</a>.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .pref-btn {
+    margin-top: 1.5rem;
+  }
+  code {
+    font-size: 0.875em;
+    background: var(--stone);
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    word-break: break-word;
+  }
+</style>

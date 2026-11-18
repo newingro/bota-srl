@@ -1,0 +1,54 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import Logo from '../../components/Logo.astro';
+import { get } from '../../lib/db';
+import { verifyPassword, clientIp, hmac, rateLimit } from '../../lib/security';
+import { createSession } from '../../lib/auth';
+import { ahref, readForm, fstr } from '../../lib/admin';
+
+export const prerender = false;
+
+const next = Astro.url.searchParams.get('next') || '';
+const safeNext = next.startsWith('/') && !next.startsWith('//') ? next : ahref(Astro, '/');
+if (Astro.locals.user) return Astro.redirect(safeNext);
+
+let error = '';
+const form = await readForm(Astro);
+if (form) {
+  const email = fstr(form, 'email', 200).toLowerCase();
+  const password = String(form.get('password') ?? '');
+  const ip = clientIp(Astro.request, Astro.clientAddress);
+  if (!(await rateLimit(`login:${hmac(ip)}`, 8, 900))) {
+    error = 'Troppi tentativi. Riprova tra 15 minuti.';
+  } else {
+    const user = await get<{ id: number; password_hash: string }>('SELECT id, password_hash FROM admin_users WHERE email = ?', [email]);
+    if (user && (await verifyPassword(password, String(user.password_hash)))) {
+      await createSession(Astro.cookies, Number(user.id));
+      return Astro.redirect(safeNext, 303);
+    }
+    error = 'Email o password non corretti.';
+  }
+}
+---
+
+<Admin title="Accesso" bare>
+  <main class="login">
+    <div class="login__box">
+      <Logo />
+      <h1>Accedi al gestionale</h1>
+      <p class="muted">Area riservata al personale di Bota s.r.l.</p>
+      {error && <p class="alert alert--error" role="alert">{error}</p>}
+      <form method="post" class="form-grid">
+        <div class="field">
+          <label for="email">Email</label>
+          <input class="input" id="email" name="email" type="email" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" required />
+        </div>
+        <button class="btn btn--block" type="submit">Accedi</button>
+      </form>
+    </div>
+  </main>
+</Admin>

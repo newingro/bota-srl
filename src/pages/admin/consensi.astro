@@ -1,0 +1,64 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { all, get } from '../../lib/db';
+import { formatDate } from '../../lib/format';
+
+export const prerender = false;
+const page = Math.max(1, Number(Astro.url.searchParams.get('p') || 1));
+const rows = await all('SELECT * FROM consent_log ORDER BY id DESC LIMIT 100 OFFSET ?', [(page - 1) * 100]);
+const total = Number((await get<{ n: number }>('SELECT COUNT(*) AS n FROM consent_log'))?.n ?? 0);
+const stats = await all<{ action: string; n: number }>("SELECT action, COUNT(*) AS n FROM consent_log WHERE created_at >= datetime('now', '-30 days') GROUP BY action ORDER BY n DESC");
+const labels: Record<string, string> = {
+  accept_all: 'Accetta tutti',
+  reject_all: 'Rifiuta tutti',
+  close_x: 'Chiusura con X',
+  custom: 'Scelta personalizzata',
+  grant_exp: 'Consenso mappa',
+};
+const fmt = (json: string) => {
+  try {
+    const c = JSON.parse(json);
+    return ['stat', 'mkt', 'exp'].map((k) => `${{ stat: 'Statistiche', mkt: 'Marketing', exp: 'Mappe' }[k]}: ${c[k] ? 'sì' : 'no'}`).join(' · ');
+  } catch {
+    return json;
+  }
+};
+---
+
+<Admin title="Registro consensi cookie" section="consensi">
+  <section class="panel">
+    <p class="help" style="margin:0">
+      Ogni scelta fatta nel banner cookie viene registrata qui come prova del consenso (art. 7.1 GDPR): identificativo anonimo, data,
+      preferenze, versione della cookie policy, IP troncato e browser. Totale registrazioni: <strong>{total}</strong>.
+    </p>
+  </section>
+  <div class="kpis">
+    {stats.map((s) => (<div class="kpi"><span class="kpi__label">{labels[s.action] ?? s.action}</span><span class="kpi__value">{s.n}</span><span class="kpi__sub">ultimi 30 giorni</span></div>))}
+  </div>
+  <section class="panel">
+    {
+      rows.length ? (
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Data</th><th>ID consenso</th><th>Azione</th><th>Preferenze</th><th>Versione</th><th>IP</th></tr></thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr>
+                  <td class="nowrap">{formatDate(String(r.created_at), true)}</td>
+                  <td><code>{String(r.consent_id).slice(0, 13)}…</code></td>
+                  <td>{labels[String(r.action)] ?? r.action}</td>
+                  <td>{fmt(String(r.choices))}</td>
+                  <td>{r.version}</td>
+                  <td>{r.ip_trunc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p class="empty-state">Nessuna registrazione ancora.</p>
+      )
+    }
+    {total > page * 100 && <p><a href={`?p=${page + 1}`}>Pagina successiva →</a></p>}
+  </section>
+</Admin>

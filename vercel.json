@@ -1,0 +1,26 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    { "source": "/:path(.*)", "has": [{ "type": "host", "value": "www.bota.srl" }], "destination": "https://bota.srl/:path", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/", "has": [{ "type": "host", "value": "admin.bota.srl" }], "destination": "/admin" },
+    { "source": "/:path((?!admin|api/|_astro/|media/|_server-islands/|favicon).*)", "has": [{ "type": "host", "value": "admin.bota.srl" }], "destination": "/admin/:path" }
+  ],
+  "headers": [
+    {
+      "source": "/_astro/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=()" }
+      ]
+    }
+  ]
+}

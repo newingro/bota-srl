@@ -1,0 +1,118 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import CampaignForm from '../../../components/admin/CampaignForm.astro';
+import { get, run } from '../../../lib/db';
+import { ahref, readForm, fstr } from '../../../lib/admin';
+import { campaignFields, sendCampaign, sendTest } from '../../../lib/campaigns';
+import { campaignEmail, type CampaignData } from '../../../emails/templates';
+import { EMAIL_RE } from '../../../lib/newsletter';
+import { formatDate } from '../../../lib/format';
+import { mailMode } from '../../../lib/email';
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+let error = '';
+const form = await readForm(Astro);
+if (form) {
+  const action = fstr(form, 'action');
+  const current = await get<CampaignData & { status: string }>('SELECT * FROM campaigns WHERE id = ?', [id]);
+  if (!current) return Astro.redirect(ahref(Astro, '/campagne'));
+  if (action === 'save' && current.status === 'draft') {
+    const d = campaignFields(form);
+    if (!d.subject) error = 'L’oggetto è obbligatorio.';
+    else {
+      await run(`UPDATE campaigns SET ${Object.keys(d).map((k) => `${k} = ?`).join(', ')}, updated_at = datetime('now') WHERE id = ?`, [...Object.values(d), id]);
+      return Astro.redirect(ahref(Astro, `/campagne/${id}?ok=saved`), 303);
+    }
+  } else if (action === 'test') {
+    const to = fstr(form, 'test_to', 200);
+    if (!EMAIL_RE.test(to)) error = 'Indirizzo per la prova non valido.';
+    else {
+      const r = await sendTest(current, to);
+      if (r.ok) return Astro.redirect(ahref(Astro, `/campagne/${id}?ok=test`), 303);
+      error = `Invio di prova non riuscito: ${r.error}`;
+    }
+  } else if (action === 'send') {
+    if (form.get('confirm') !== 'yes') error = 'Spunta la conferma per inviare la campagna.';
+    else {
+      await sendCampaign(id);
+      return Astro.redirect(ahref(Astro, `/campagne/${id}?ok=sent`), 303);
+    }
+  } else if (action === 'duplicate') {
+    const { lastId } = await run(
+      `INSERT INTO campaigns(subject, preheader, title, body, coupon_code, coupon_text, coupon_expiry, cta_label, cta_url)
+       SELECT 'Copia di ' || subject, preheader, title, body, coupon_code, coupon_text, coupon_expiry, cta_label, cta_url FROM campaigns WHERE id = ?`,
+      [id],
+    );
+    return Astro.redirect(ahref(Astro, `/campagne/${lastId}?ok=created`), 303);
+  } else if (action === 'delete') {
+    await run('DELETE FROM campaign_sends WHERE campaign_id = ?', [id]);
+    await run('DELETE FROM campaigns WHERE id = ?', [id]);
+    return Astro.redirect(ahref(Astro, '/campagne?ok=deleted'), 303);
+  }
+}
+
+const c = await get<CampaignData & Record<string, unknown>>('SELECT * FROM campaigns WHERE id = ?', [id]);
+if (!c) return Astro.redirect(ahref(Astro, '/campagne'));
+const confirmed = Number((await get<{ n: number }>("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'confirmed'"))?.n ?? 0);
+const preview = campaignEmail(c, 'anteprima').html;
+const isDraft = c.status === 'draft';
+---
+
+<Admin title={String(c.subject)} section="campagne">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/campagne')}>← Campagne</a>
+  {error && <p class="alert alert--error">{error}</p>}
+  <div class="layout-2">
+    <div>
+      {
+        isDraft ? (
+          <form method="post" class="panel">
+            <div class="panel__head"><h2>Contenuto</h2></div>
+            <CampaignForm c={c} />
+            <p><button class="btn" type="submit" name="action" value="save">Salva modifiche</button></p>
+          </form>
+        ) : (
+          <section class="panel">
+            <h2>Campagna inviata</h2>
+            <dl class="dl" style="margin-top:1rem">
+              <dt>Inviata il</dt><dd>{formatDate(String(c.sent_at), true)}</dd>
+              <dt>Destinatari</dt><dd>{c.recipients}</dd>
+              <dt>Consegnate</dt><dd>{c.sent_count}</dd>
+              <dt>Errori</dt><dd>{c.failed_count}</dd>
+            </dl>
+          </section>
+        )
+      }
+      <section class="panel">
+        <div class="panel__head"><h2>Anteprima email</h2></div>
+        <iframe class="preview-frame" title="Anteprima della campagna" srcdoc={preview} sandbox=""></iframe>
+      </section>
+    </div>
+    <aside>
+      <form method="post" class="panel">
+        <h2>Invia una prova</h2>
+        <div class="field" style="margin-top:1rem">
+          <label for="test_to">Indirizzo email</label>
+          <input class="input" id="test_to" name="test_to" type="email" value={Astro.locals.user?.email ?? ''} required />
+        </div>
+        <p><button class="btn btn--ghost btn--block" type="submit" name="action" value="test"><Icon name="send" size={18} /> Invia prova</button></p>
+      </form>
+      {
+        isDraft && (
+          <form method="post" class="panel" data-confirm={`Inviare la campagna a ${confirmed} iscritti? L'operazione non si può annullare.`}>
+            <h2>Invia a tutti</h2>
+            <p class="help">Destinatari: <strong>{confirmed} iscritti confermati</strong>.{mailMode() === 'outbox' ? ' Modalità prova: le email vengono salvate ma non spedite.' : ''}</p>
+            <label class="check" style="margin:1rem 0"><input type="checkbox" name="confirm" value="yes" /> <span>Ho controllato l’anteprima e voglio inviare la campagna.</span></label>
+            <button class="btn btn--block" type="submit" name="action" value="send" disabled={confirmed === 0}><Icon name="megaphone" size={18} /> Invia campagna</button>
+          </form>
+        )
+      }
+      <div class="panel">
+        <form method="post" style="display:inline"><button class="btn btn--sm btn--ghost" type="submit" name="action" value="duplicate">Duplica</button></form>
+        {isDraft && <form method="post" style="display:inline" data-confirm="Eliminare la campagna?"><button class="btn btn--sm btn--danger" type="submit" name="action" value="delete"><Icon name="trash" size={16} /> Elimina</button></form>}
+      </div>
+    </aside>
+  </div>
+</Admin>

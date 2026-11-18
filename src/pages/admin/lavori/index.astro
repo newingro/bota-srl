@@ -1,0 +1,59 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import { all } from '../../../lib/db';
+import { ahref } from '../../../lib/admin';
+import { formatDate } from '../../../lib/format';
+import { parseVariants } from '../../../lib/images';
+
+export const prerender = false;
+
+const works = await all(`SELECT w.*, (SELECT COUNT(*) FROM images i WHERE i.work_id = w.id) AS n_img,
+  COALESCE((SELECT variants FROM images i WHERE i.id = w.cover_image_id), (SELECT variants FROM images i WHERE i.work_id = w.id ORDER BY sort, id LIMIT 1)) AS cover
+  FROM works w ORDER BY w.status DESC, w.sort, w.updated_at DESC`);
+const site = (process.env.SITE_URL || '').replace(/\/$/, '');
+---
+
+<Admin title="Lavori e casi studio" section="lavori">
+  <a slot="actions" class="btn btn--sm" href={ahref(Astro, '/lavori/nuovo')}><Icon name="plus" size={18} /> Nuovo lavoro</a>
+  <section class="panel">
+    {
+      works.length ? (
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th></th><th>Titolo</th><th>Intervento</th><th>Località</th><th class="num">Foto</th><th>Stato</th><th>Aggiornato</th><th></th></tr></thead>
+            <tbody>
+              {works.map((w) => {
+                const cover = parseVariants(w.cover)[0];
+                return (
+                  <tr>
+                    <td>{cover ? <img class="thumb" src={cover.url} alt="" width="64" height="48" loading="lazy" /> : <span class="thumb" style="display:block" />}</td>
+                    <td>
+                      <a href={ahref(Astro, `/lavori/${w.id}`)}>{w.title}</a>
+                      {Number(w.featured) ? <span class="pill pill--warn"> In evidenza</span> : null}
+                      {Number(w.is_example) ? <span class="pill pill--muted"> Esempio</span> : null}
+                    </td>
+                    <td>{w.service || '–'}</td>
+                    <td>{w.location || '–'}</td>
+                    <td class="num">{w.n_img}</td>
+                    <td>{w.status === 'published' ? <span class="pill pill--ok">Pubblicato</span> : <span class="pill pill--muted">Bozza</span>}</td>
+                    <td class="nowrap">{formatDate(String(w.updated_at))}</td>
+                    <td class="nowrap">
+                      <a class="btn btn--sm btn--ghost" href={ahref(Astro, `/lavori/${w.id}`)}><Icon name="edit" size={16} /> Modifica</a>
+                      {w.status === 'published' && <a class="btn btn--sm btn--ghost" href={`${site}/lavori/${w.slug}/`} target="_blank" rel="noopener" aria-label={`Vedi ${w.title} sul sito`}><Icon name="eye" size={16} /></a>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div class="empty-state">
+          <p>Nessun lavoro ancora. Crea il primo caso studio con foto prima/dopo.</p>
+          <a class="btn" href={ahref(Astro, '/lavori/nuovo')}><Icon name="plus" /> Nuovo lavoro</a>
+        </div>
+      )
+    }
+  </section>
+</Admin>

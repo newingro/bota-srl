@@ -1,0 +1,30 @@
+---
+import type { WorkImage } from '../lib/works';
+import { srcset } from '../lib/images';
+interface Props {
+  image: WorkImage;
+  sizes?: string;
+  priority?: boolean;
+  class?: string;
+  alt?: string;
+}
+const { image, sizes = '(min-width: 1024px) 33vw, 100vw', priority = false, class: cls, alt } = Astro.props;
+const fallback = image.variants[Math.min(1, image.variants.length - 1)] ?? image.variants[0];
+---
+
+{
+  fallback && (
+    <img
+      src={fallback.url}
+      srcset={srcset(image.variants)}
+      sizes={sizes}
+      width={image.width}
+      height={image.height}
+      alt={alt ?? image.alt}
+      class={cls}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      fetchpriority={priority ? 'high' : undefined}
+    />
+  )
+}

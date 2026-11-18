@@ -1,0 +1,46 @@
+---
+/**
+ * Sezione "Lavori realizzati" della home: caricata dal server (server island) così la home resta
+ * statica e velocissima, mentre i lavori pubblicati dal gestionale compaiono subito.
+ */
+import WorkCard from './WorkCard.astro';
+import Icon from './Icon.astro';
+import { publishedWorks } from '../lib/works';
+
+Astro.response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+Astro.response.headers.set('CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=86400');
+const works = await publishedWorks({ limit: 3, featuredFirst: true }).catch(() => []);
+---
+
+{
+  works.length > 0 && (
+    <section class="section" aria-labelledby="lavori-title">
+      <div class="container">
+        <div class="section-head head-row">
+          <div>
+            <p class="eyebrow">Lavori realizzati</p>
+            <h2 id="lavori-title">Alcuni dei nostri cantieri</h2>
+          </div>
+          <a href="/lavori/" class="link-arrow">Tutti i lavori <Icon name="arrow" /></a>
+        </div>
+        <div class="grid grid--3">
+          {works.map((w) => <WorkCard work={w} />)}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .head-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1rem;
+    max-width: none;
+  }
+  .head-row h2 {
+    margin: 0;
+  }
+</style>

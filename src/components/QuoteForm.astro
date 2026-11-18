@@ -1,0 +1,256 @@
+---
+import Icon from './Icon.astro';
+import { quoteServiceOptions } from '../data/services';
+
+interface Props {
+  /** Servizio preselezionato (es. dalla pagina servizio) */
+  preselect?: string;
+  title?: string;
+  compact?: boolean;
+}
+const { preselect = '', title = 'Richiedi un preventivo gratuito', compact = false } = Astro.props;
+const comuni = [
+  'Firenze', 'Campi Bisenzio', 'Sesto Fiorentino', 'Calenzano', 'Signa', 'Scandicci', 'Lastra a Signa',
+  'Bagno a Ripoli', 'Fiesole', 'Impruneta', 'Empoli', 'Montelupo Fiorentino', 'Pontassieve', 'Borgo San Lorenzo', 'Prato',
+];
+---
+
+<div class:list={['qf', { 'qf--compact': compact }]} id="preventivo">
+  <div class="qf__head">
+    <h2 class="qf__title">{title}</h2>
+    <p class="qf__sub">Compila il modulo in 2 minuti: <strong>ti richiamiamo al più presto</strong> per capire le tue esigenze. Nessun impegno.</p>
+  </div>
+
+  <form class="qf__form" method="post" action="/api/preventivo" novalidate data-quote-form>
+    <div class="qf__grid">
+      <div class="field">
+        <label for="qf-name">Nome e cognome <span class="req" aria-hidden="true">*</span></label>
+        <input class="input" id="qf-name" name="name" type="text" autocomplete="name" required minlength="2" maxlength="120" aria-describedby="qf-name-err" />
+        <p class="field-error" id="qf-name-err"></p>
+      </div>
+      <div class="field">
+        <label for="qf-phone">Telefono <span class="req" aria-hidden="true">*</span></label>
+        <input class="input" id="qf-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required pattern="[0-9 +\(\)\.\/\-]{6,}" maxlength="40" aria-describedby="qf-phone-err" />
+        <p class="field-error" id="qf-phone-err"></p>
+      </div>
+      <div class="field">
+        <label for="qf-email">Email <span class="req" aria-hidden="true">*</span></label>
+        <input class="input" id="qf-email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength="200" aria-describedby="qf-email-err" />
+        <p class="field-error" id="qf-email-err"></p>
+      </div>
+      <div class="field">
+        <label for="qf-comune">Comune dell’immobile</label>
+        <input class="input" id="qf-comune" name="comune" type="text" list="qf-comuni" autocomplete="address-level2" maxlength="120" />
+        <datalist id="qf-comuni">{comuni.map((c) => <option value={c} />)}</datalist>
+      </div>
+      <div class="field">
+        <label for="qf-service">Tipo di intervento <span class="req" aria-hidden="true">*</span></label>
+        <select class="select" id="qf-service" name="service" required aria-describedby="qf-service-err">
+          <option value="" selected={!preselect}>Seleziona…</option>
+          {quoteServiceOptions.map((o) => <option value={o} selected={o === preselect}>{o}</option>)}
+        </select>
+        <p class="field-error" id="qf-service-err"></p>
+      </div>
+      <div class="field">
+        <label for="qf-timing">Quando vorresti iniziare?</label>
+        <select class="select" id="qf-timing" name="timing">
+          <option value="">Seleziona…</option>
+          <option>Il prima possibile</option>
+          <option>Entro 3 mesi</option>
+          <option>Entro 6 mesi</option>
+          <option>Sto solo valutando</option>
+        </select>
+      </div>
+      <div class="field qf__full">
+        <label for="qf-message">Descrivi il lavoro <span class="hint">(facoltativo)</span></label>
+        <textarea class="textarea" id="qf-message" name="message" maxlength="4000" placeholder="Es. ristrutturazione bagno di 6 mq, sostituzione sanitari e piastrelle…"></textarea>
+      </div>
+    </div>
+
+    <div class="qf__checks">
+      <label class="check">
+        <input type="checkbox" name="privacy" value="yes" required aria-describedby="qf-privacy-err" />
+        <span>Ho letto l’<a href="/privacy-policy/#preventivi" target="_blank">informativa privacy</a> e chiedo di essere ricontattato per ricevere il preventivo. <span class="req" aria-hidden="true">*</span></span>
+      </label>
+      <p class="field-error" id="qf-privacy-err"></p>
+      <label class="check">
+        <input type="checkbox" name="newsletter" value="yes" />
+        <span>Sì, voglio ricevere via email offerte, coupon e novità di Bota s.r.l. <span class="hint">(facoltativo, puoi cancellarti quando vuoi)</span></span>
+      </label>
+    </div>
+
+    <div class="hp" aria-hidden="true"><label>Non compilare <input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+    <input type="hidden" name="ts" value="" />
+    <input type="hidden" name="source_page" value="" />
+    <input type="hidden" name="utm_source" value="" />
+    <input type="hidden" name="utm_medium" value="" />
+    <input type="hidden" name="utm_campaign" value="" />
+    <input type="hidden" name="gclid" value="" />
+
+    <p class="qf__status alert" role="alert" hidden></p>
+
+    <button type="submit" class="btn btn--lg btn--block qf__submit">
+      <span class="qf__label">Richiedi il preventivo gratuito</span>
+      <Icon name="arrow" />
+    </button>
+    <ul class="qf__trust">
+      <li><Icon name="check" size={18} /> Gratuito e senza impegno</li>
+      <li><Icon name="phone" size={18} /> Ti richiamiamo al più presto</li>
+      <li><Icon name="shield" size={18} /> Dati protetti, mai ceduti</li>
+    </ul>
+  </form>
+</div>
+
+<script>
+  import { track } from '../scripts/consent';
+
+  const form = document.querySelector<HTMLFormElement>('[data-quote-form]');
+  if (form) {
+    const set = (name: string, v: string) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | null;
+      if (el) el.value = v;
+    };
+    // Attribuzione campagne: memorizza UTM/gclid della pagina di atterraggio per la sessione
+    try {
+      const qs = new URLSearchParams(location.search);
+      const keys = ['utm_source', 'utm_medium', 'utm_campaign', 'gclid'];
+      if (keys.some((k) => qs.get(k))) sessionStorage.setItem('bota_attr', JSON.stringify(Object.fromEntries(keys.map((k) => [k, qs.get(k) || '']))));
+      const attr = JSON.parse(sessionStorage.getItem('bota_attr') || '{}');
+      keys.forEach((k) => set(k, attr[k] || ''));
+    } catch {
+      /* sessionStorage non disponibile */
+    }
+    set('ts', String(Date.now()));
+    set('source_page', location.pathname);
+
+    const status = form.querySelector<HTMLElement>('.qf__status')!;
+    const btn = form.querySelector<HTMLButtonElement>('.qf__submit')!;
+    const label = btn.querySelector<HTMLElement>('.qf__label')!;
+
+    const fieldError = (name: string, msg: string) => {
+      const el = form.elements.namedItem(name) as HTMLInputElement | null;
+      const err = document.getElementById(`qf-${name}-err`);
+      if (el) el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      if (err) err.textContent = msg;
+    };
+    const messages: Record<string, string> = {
+      name: 'Inserisci nome e cognome.',
+      phone: 'Inserisci un numero di telefono valido.',
+      email: 'Inserisci un indirizzo email valido.',
+      service: 'Seleziona il tipo di intervento.',
+      privacy: 'Conferma di aver letto l’informativa privacy.',
+    };
+
+    const validate = () => {
+      let first: HTMLElement | null = null;
+      for (const name of Object.keys(messages)) {
+        const el = form.elements.namedItem(name) as HTMLInputElement;
+        const ok = el.type === 'checkbox' ? el.checked : el.checkValidity() && el.value.trim().length > 0;
+        fieldError(name, ok ? '' : messages[name]);
+        if (!ok && !first) first = el;
+      }
+      if (first) first.focus();
+      return !first;
+    };
+
+    form.addEventListener('input', (e) => {
+      const t = e.target as HTMLInputElement;
+      if (t.getAttribute('aria-invalid') === 'true') {
+        const ok = t.type === 'checkbox' ? t.checked : t.checkValidity();
+        if (ok) fieldError(t.name, '');
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = true;
+      if (!validate()) return;
+      btn.disabled = true;
+      label.textContent = 'Invio in corso…';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { Accept: 'application/json' } });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          if (data.errors) Object.entries(data.errors as Record<string, string>).forEach(([k, v]) => fieldError(k, v));
+          throw new Error(data.error || 'Invio non riuscito. Riprova o chiamaci.');
+        }
+        track('generate_lead', { form: 'preventivo', service: (form.elements.namedItem('service') as HTMLSelectElement).value });
+        location.href = data.redirect || '/preventivo/grazie/';
+      } catch (err) {
+        status.textContent = (err as Error).message;
+        status.className = 'qf__status alert alert--error';
+        status.hidden = false;
+        btn.disabled = false;
+        label.textContent = 'Richiedi il preventivo gratuito';
+      }
+    });
+  }
+</script>
+
+<style>
+  .qf {
+    background: var(--white);
+    border-radius: calc(var(--radius) + 4px);
+    padding: clamp(1.25rem, 3.5vw, 2.25rem);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--line);
+    color: var(--ink);
+  }
+  .qf a:not(.btn) {
+    color: var(--brand-strong);
+  }
+  .qf__title {
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    margin-bottom: 0.35em;
+  }
+  .qf__sub {
+    color: var(--ink-2);
+    margin-bottom: 1.5rem;
+  }
+  .qf__form {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .qf__grid {
+    display: grid;
+    gap: 1rem;
+  }
+  @media (min-width: 640px) {
+    .qf__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+    .qf__full {
+      grid-column: 1 / -1;
+    }
+  }
+  .qf__checks {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .qf__trust {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .qf__trust li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .qf__trust :global(svg) {
+    color: var(--ok);
+  }
+  .qf__submit[disabled] {
+    opacity: 0.7;
+    cursor: progress;
+  }
+  .qf--compact .qf__sub {
+    margin-bottom: 1rem;
+  }
+</style>

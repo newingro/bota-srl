@@ -1,0 +1,29 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import CampaignForm from '../../../components/admin/CampaignForm.astro';
+import { run } from '../../../lib/db';
+import { ahref, readForm } from '../../../lib/admin';
+import { campaignFields } from '../../../lib/campaigns';
+
+export const prerender = false;
+let error = '';
+const form = await readForm(Astro);
+if (form) {
+  const d = campaignFields(form);
+  if (!d.subject) error = 'L’oggetto è obbligatorio.';
+  else {
+    const cols = Object.keys(d);
+    const { lastId } = await run(`INSERT INTO campaigns(${cols.join(', ')}) VALUES (${cols.map(() => '?').join(', ')})`, Object.values(d));
+    return Astro.redirect(ahref(Astro, `/campagne/${lastId}?ok=created`), 303);
+  }
+}
+---
+
+<Admin title="Nuova campagna" section="campagne">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/campagne')}>← Campagne</a>
+  {error && <p class="alert alert--error">{error}</p>}
+  <form method="post" class="panel">
+    <CampaignForm />
+    <p><button class="btn" type="submit">Salva e vedi anteprima →</button></p>
+  </form>
+</Admin>

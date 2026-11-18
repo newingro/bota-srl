@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0v40" fill="none" stroke="#2f3a42" stroke-width="1.5"/></pattern></defs>
+  <rect width="1200" height="900" fill="#1b2126"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+  <!-- pianta -->
+  <g fill="none" stroke="#e9e3da" stroke-width="10" stroke-linejoin="round">
+    <path d="M160 160h620v520H160Z"/>
+    <path d="M160 420h260M500 420h280M420 160v150M420 380v40M600 420v260"/>
+  </g>
+  <g fill="none" stroke="#e9e3da" stroke-width="4"><path d="M420 310a70 70 0 0 1 70 70" /><path d="M500 420a70 70 0 0 0-70-70" opacity="0"/><path d="M600 560a60 60 0 0 1 60-60"/></g>
+  <g stroke="#f08a5d" stroke-width="4" fill="#f08a5d" font-family="Arial, sans-serif" font-size="28" font-weight="700">
+    <path d="M160 110h620M160 95v30M780 95v30"/><text x="430" y="95" stroke="none">12,40 m</text>
+    <path d="M830 160v520M815 160h30M815 680h30"/><text x="850" y="430" stroke="none">10,40 m</text>
+  </g>
+  <g fill="#c9d0d6" font-family="Arial, sans-serif" font-size="30" font-weight="700"><text x="210" y="300">SOGGIORNO</text><text x="200" y="560">CUCINA</text><text x="455" y="560">BAGNO</text><text x="630" y="300">CAMERA</text></g>
+  <!-- casco -->
+  <g transform="translate(860 560)">
+    <path d="M20 170c0-90 60-150 130-150s130 60 130 150Z" fill="#f2b33d"/>
+    <path d="M120 22h60v60h-60Z" fill="#e4a12c"/>
+    <rect x="0" y="165" width="300" height="34" rx="17" fill="#e4a12c"/>
+    <path d="M70 165c0-60 30-110 80-130" stroke="#ffd67a" stroke-width="12" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- metro -->
+  <g transform="rotate(-12 300 790)"><rect x="160" y="740" width="420" height="70" rx="8" fill="#b4441a"/><g stroke="#fff" stroke-width="4"><path d="M190 740v30M230 740v20M270 740v30M310 740v20M350 740v30M390 740v20M430 740v30M470 740v20M510 740v30M550 740v20"/></g></g>
+  <!-- matita -->
+  <g transform="rotate(35 900 250)"><rect x="820" y="230" width="260" height="36" fill="#e9e3da"/><path d="M1080 230l50 18-50 18Z" fill="#c99a6b"/><rect x="800" y="230" width="24" height="36" fill="#f08a5d"/></g>
+</svg>

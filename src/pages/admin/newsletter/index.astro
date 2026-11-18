@@ -1,0 +1,101 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import { all, run } from '../../../lib/db';
+import { ahref, readForm, fstr } from '../../../lib/admin';
+import { formatDate } from '../../../lib/format';
+
+export const prerender = false;
+
+const form = await readForm(Astro);
+if (form) {
+  const id = Number(form.get('id'));
+  const action = fstr(form, 'action');
+  if (action === 'delete') await run('DELETE FROM subscribers WHERE id = ?', [id]);
+  if (action === 'unsubscribe') await run("UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = datetime('now') WHERE id = ?", [id]);
+  return Astro.redirect(ahref(Astro, `/newsletter${Astro.url.search}`) + (Astro.url.search ? '&' : '?') + 'ok=' + (action === 'delete' ? 'deleted' : 'saved'), 303);
+}
+
+const stato = Astro.url.searchParams.get('stato') || 'confirmed';
+const q = (Astro.url.searchParams.get('q') || '').trim().toLowerCase();
+const statuses = [
+  { v: 'confirmed', l: 'Confermati', tone: 'ok' },
+  { v: 'pending', l: 'In attesa di conferma', tone: 'warn' },
+  { v: 'unsubscribed', l: 'Disiscritti', tone: 'muted' },
+];
+const counts = Object.fromEntries((await all<{ status: string; n: number }>('SELECT status, COUNT(*) AS n FROM subscribers GROUP BY status')).map((r) => [r.status, Number(r.n)]));
+const subs = await all(
+  `SELECT * FROM subscribers WHERE status = ? ${q ? 'AND email LIKE ?' : ''} ORDER BY created_at DESC LIMIT 500`,
+  q ? [stato, `%${q}%`] : [stato],
+);
+---
+
+<Admin title="Iscritti newsletter" section="newsletter">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/newsletter/export.csv')}><Icon name="download" size={18} /> Esporta CSV</a>
+  <a slot="actions" class="btn btn--sm" href={ahref(Astro, '/campagne/nuova')}><Icon name="megaphone" size={18} /> Nuova campagna</a>
+
+  <div class="toolbar">
+    <nav class="tabs" aria-label="Filtra per stato">
+      {statuses.map((s) => (<a href={ahref(Astro, `/newsletter?stato=${s.v}`)} aria-current={stato === s.v ? 'page' : undefined}>{s.l} ({counts[s.v] ?? 0})</a>))}
+    </nav>
+    <form method="get" class="toolbar" role="search" style="margin:0 0 0 auto">
+      <input type="hidden" name="stato" value={stato} />
+      <label class="sr-only" for="q">Cerca email</label>
+      <input class="input" id="q" name="q" type="search" placeholder="Cerca email…" value={q} />
+      <button class="btn btn--sm" type="submit">Cerca</button>
+    </form>
+  </div>
+
+  <section class="panel">
+    <p class="help gdpr">
+      <Icon name="shield" size={16} /> Gli iscritti entrano in lista solo dopo aver confermato l’email (double opt-in). Per ognuno è
+      registrata la prova del consenso: testo accettato, versione, data, IP troncato. Le campagne vengono inviate solo ai <strong>confermati</strong>.
+    </p>
+    {
+      subs.length ? (
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Email</th><th>Origine</th><th>Iscrizione</th><th>{stato === 'unsubscribed' ? 'Disiscrizione' : 'Conferma'}</th><th>Prova del consenso</th><th></th></tr></thead>
+            <tbody>
+              {subs.map((s) => (
+                <tr>
+                  <td><strong>{s.email}</strong>{s.name ? <><br /><span class="muted">{s.name}</span></> : null}</td>
+                  <td>{s.source}</td>
+                  <td class="nowrap">{formatDate(String(s.created_at), true)}</td>
+                  <td class="nowrap">{formatDate(String(stato === 'unsubscribed' ? s.unsubscribed_at : s.confirmed_at), true)}</td>
+                  <td><details><summary>Dettagli</summary><p class="help">“{s.consent_text}”<br />Versione {s.consent_version} · IP {s.consent_ip || '–'}{s.confirmed_ip ? ` · conferma da IP ${s.confirmed_ip}` : ''}</p></details></td>
+                  <td class="nowrap">
+                    <form method="post" style="display:inline">
+                      <input type="hidden" name="id" value={s.id} />
+                      {s.status !== 'unsubscribed' && <button class="btn btn--sm btn--ghost" name="action" value="unsubscribe" type="submit">Disiscrivi</button>}
+                    </form>
+                    <form method="post" style="display:inline" data-confirm={`Eliminare definitivamente ${s.email} e la relativa prova del consenso? Usa questa opzione solo su richiesta di cancellazione (art. 17 GDPR).`}>
+                      <input type="hidden" name="id" value={s.id} />
+                      <button class="btn btn--sm btn--danger" name="action" value="delete" type="submit" aria-label={`Elimina ${s.email}`}><Icon name="trash" size={16} /></button>
+                    </form>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p class="empty-state">Nessun iscritto in questa lista.</p>
+      )
+    }
+  </section>
+</Admin>
+
+<style>
+  .gdpr {
+    display: flex;
+    gap: 0.5rem;
+    align-items: start;
+    margin: 0 0 1rem;
+  }
+  details summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+</style>

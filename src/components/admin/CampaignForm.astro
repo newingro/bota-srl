@@ -1,0 +1,68 @@
+---
+interface Props { c?: Record<string, unknown> }
+const { c = {} } = Astro.props;
+const v = (k: string) => String(c[k] ?? '');
+---
+
+<div class="form-grid form-grid--2">
+  <div class="field span-2">
+    <label for="subject">Oggetto dell’email <span class="req">*</span></label>
+    <input class="input" id="subject" name="subject" required maxlength="150" value={v('subject')} placeholder="Es. -10% sul rifacimento del bagno fino a fine mese" />
+  </div>
+  <div class="field span-2">
+    <label for="preheader">Anteprima (testo grigio dopo l’oggetto)</label>
+    <input class="input" id="preheader" name="preheader" maxlength="150" value={v('preheader')} placeholder="Es. Solo per gli iscritti alla newsletter" />
+  </div>
+  <div class="field span-2">
+    <label for="title">Titolo</label>
+    <input class="input" id="title" name="title" maxlength="150" value={v('title')} />
+  </div>
+  <div class="field span-2">
+    <label for="body">Testo</label>
+    <textarea class="textarea" id="body" name="body" rows="8">{v('body')}</textarea>
+    <p class="help">Riga vuota = nuovo paragrafo · <code>- voce</code> = elenco · <code>**testo**</code> = grassetto · <code>[testo](https://link)</code> = link.</p>
+  </div>
+  <fieldset class="span-2 coupon">
+    <legend>Coupon (facoltativo)</legend>
+    <div class="form-grid form-grid--2">
+      <div class="field">
+        <label for="coupon_code">Codice</label>
+        <input class="input" id="coupon_code" name="coupon_code" maxlength="40" value={v('coupon_code')} placeholder="BOTA10" />
+      </div>
+      <div class="field">
+        <label for="coupon_expiry">Scadenza</label>
+        <input class="input" id="coupon_expiry" name="coupon_expiry" type="date" value={v('coupon_expiry')} />
+      </div>
+      <div class="field span-2">
+        <label for="coupon_text">Descrizione del coupon</label>
+        <input class="input" id="coupon_text" name="coupon_text" maxlength="200" value={v('coupon_text')} placeholder="Es. 10% di sconto sulla manodopera per lavori confermati entro la scadenza" />
+      </div>
+    </div>
+  </fieldset>
+  <div class="field">
+    <label for="cta_label">Testo del pulsante</label>
+    <input class="input" id="cta_label" name="cta_label" maxlength="60" value={v('cta_label') || 'Richiedi il preventivo'} />
+  </div>
+  <div class="field">
+    <label for="cta_url">Link del pulsante</label>
+    <input class="input" id="cta_url" name="cta_url" type="url" maxlength="300" value={v('cta_url') || 'https://bota.srl/contatti/?utm_source=newsletter&utm_medium=email#preventivo'} />
+  </div>
+</div>
+
+<style>
+  .coupon {
+    border: 1px dashed var(--brand);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0;
+  }
+  .coupon legend {
+    font-weight: 700;
+    padding: 0 0.4rem;
+  }
+  code {
+    background: var(--stone);
+    padding: 0 0.3em;
+    border-radius: 4px;
+  }
+</style>

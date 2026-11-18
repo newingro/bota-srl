@@ -1,0 +1,362 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import UploadedImage from '../../components/UploadedImage.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { workBySlug, imagesFor, publishedWorks } from '../../lib/works';
+import { formatText, plain } from '../../lib/format';
+import { cacheHeaders } from '../../lib/cache';
+
+export const prerender = false;
+
+const slug = Astro.params.slug!;
+const work = await workBySlug(slug);
+if (!work) return new Response(null, { status: 404, statusText: 'Not found' });
+cacheHeaders(Astro);
+
+const images = await imagesFor(work.id);
+const phases = [
+  { key: 'prima', label: 'Prima' },
+  { key: 'durante', label: 'Durante i lavori' },
+  { key: 'dopo', label: 'Dopo' },
+  { key: '', label: 'Galleria' },
+];
+const groups = phases.map((p) => ({ ...p, items: images.filter((i) => (i.phase || '') === p.key) })).filter((g) => g.items.length);
+const before = images.find((i) => i.phase === 'prima');
+const after = images.find((i) => i.phase === 'dopo');
+const related = (await publishedWorks({ limit: 4 }).catch(() => [])).filter((w) => w.id !== work.id).slice(0, 3);
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Lavori', path: '/lavori/' },
+  { name: work.title, path: `/lavori/${work.slug}/` },
+];
+const description = work.seo_description || plain(work.summary || work.solution, 155) || `${work.title}: caso studio di Bota s.r.l., impresa edile a Firenze.`;
+const ogImage = work.cover?.variants.at(-1)?.url;
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: work.title,
+    description,
+    image: ogImage ? [new URL(ogImage, Astro.site).href] : undefined,
+    datePublished: work.published_at || work.created_at,
+    dateModified: work.updated_at,
+    author: { '@id': 'https://bota.srl/#impresa' },
+    publisher: { '@id': 'https://bota.srl/#impresa' },
+    about: work.service || undefined,
+    locationCreated: work.location ? { '@type': 'Place', name: work.location } : undefined,
+  },
+];
+const facts = [
+  { icon: 'tag', label: 'Intervento', value: work.service },
+  { icon: 'pin', label: 'Località', value: work.location },
+  { icon: 'calendar', label: 'Anno', value: work.year },
+  { icon: 'clock', label: 'Durata', value: work.duration },
+  { icon: 'user', label: 'Cliente', value: work.client_type },
+].filter((f) => f.value);
+const sections = [
+  { title: 'La situazione di partenza', text: work.challenge },
+  { title: 'L’intervento', text: work.solution },
+  { title: 'Il risultato', text: work.result },
+].filter((s) => s.text);
+---
+
+<Base
+  title={work.seo_title || `${work.title}${work.location ? ` – ${work.location}` : ''}`}
+  description={description}
+  ogImage={ogImage}
+  ogType="article"
+  breadcrumbs={crumbs}
+  jsonLd={ld}
+>
+  <PageHero crumbs={crumbs} eyebrow="Caso studio" title={work.title} lead={work.summary ? plain(work.summary, 400) : undefined}>
+    {work.is_example ? <p class="example-note"><Icon name="image" size={18} /> Contenuto di esempio: sarà sostituito con un lavoro reale.</p> : null}
+    {
+      facts.length > 0 && (
+        <dl class="facts">
+          {facts.map((f) => (
+            <div>
+              <dt><Icon name={f.icon} size={18} /> {f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      )
+    }
+  </PageHero>
+
+  {
+    work.cover && (
+      <div class="container cover">
+        <div class="media cover__media">
+          <UploadedImage image={work.cover} priority sizes="(min-width: 1260px) 1200px, 100vw" />
+        </div>
+      </div>
+    )
+  }
+
+  <section class="section">
+    <div class="container container--narrow">
+      {
+        sections.map((s) => (
+          <section class="case-block">
+            <h2>{s.title}</h2>
+            <div class="prose" set:html={formatText(s.text!)} />
+          </section>
+        ))
+      }
+
+      {
+        before && after && (
+          <section class="case-block" aria-labelledby="ba-title">
+            <h2 id="ba-title">Prima e dopo</h2>
+            <div class="ba" data-ba>
+              <UploadedImage image={after} class="ba__img" sizes="(min-width: 860px) 800px, 100vw" />
+              <div class="ba__before">
+                <UploadedImage image={before} class="ba__img" sizes="(min-width: 860px) 800px, 100vw" />
+              </div>
+              <span class="ba__tag ba__tag--l">Prima</span>
+              <span class="ba__tag ba__tag--r">Dopo</span>
+              <input class="ba__range" type="range" min="0" max="100" value="50" aria-label="Trascina per confrontare prima e dopo" />
+            </div>
+          </section>
+        )
+      }
+    </div>
+
+    {
+      groups.length > 0 && (
+        <div class="container">
+          {groups.map((g) => (
+            <section class="gallery-group">
+              <h2 class="gallery-title">{g.label}</h2>
+              <ul class="gallery">
+                {g.items.map((img) => (
+                  <li>
+                    <a href={img.variants.at(-1)?.url} class="gallery__link" data-lightbox data-alt={img.alt}>
+                      <UploadedImage image={img} sizes="(min-width: 900px) 33vw, 50vw" />
+                      <span class="sr-only">Ingrandisci foto: {img.alt || g.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )
+    }
+  </section>
+
+  {
+    related.length > 0 && (
+      <section class="section section--stone" aria-labelledby="altri-lavori">
+        <div class="container">
+          <h2 id="altri-lavori">Altri lavori</h2>
+          <div class="grid grid--3">{related.map((w) => <WorkCard work={w} />)}</div>
+        </div>
+      </section>
+    )
+  }
+
+  <CtaBand title="Vuoi un risultato simile per la tua casa?" />
+
+  <dialog class="lightbox" aria-label="Foto ingrandita">
+    <form method="dialog"><button class="lightbox__close" aria-label="Chiudi"><Icon name="close" /></button></form>
+    <img alt="" />
+  </dialog>
+</Base>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-ba]').forEach((ba) => {
+    const range = ba.querySelector<HTMLInputElement>('input')!;
+    const update = () => ba.style.setProperty('--pos', `${range.value}%`);
+    range.addEventListener('input', update);
+    update();
+  });
+  const dlg = document.querySelector<HTMLDialogElement>('.lightbox');
+  if (dlg) {
+    const img = dlg.querySelector('img')!;
+    document.querySelectorAll<HTMLAnchorElement>('[data-lightbox]').forEach((a) =>
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        img.src = a.href;
+        img.alt = a.dataset.alt || '';
+        dlg.showModal();
+      }),
+    );
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) dlg.close();
+    });
+  }
+</script>
+
+<style>
+  .example-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.25rem 0 0;
+    padding: 0.5rem 0.85rem;
+    background: #fff4d6;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2.5rem;
+    margin: 1.75rem 0 0;
+  }
+  .facts dt {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .facts dd {
+    margin: 0;
+    font-weight: 700;
+  }
+  .cover {
+    margin-top: clamp(-2rem, -3vw, -1rem);
+    padding-top: 0;
+  }
+  .cover__media {
+    aspect-ratio: 16 / 9;
+    box-shadow: var(--shadow-lg);
+  }
+  .case-block {
+    margin-bottom: 2.5rem;
+  }
+  .case-block h2 {
+    font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+  }
+  .ba {
+    --pos: 50%;
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--stone-2);
+  }
+  .ba :global(.ba__img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ba__before {
+    position: absolute;
+    inset: 0;
+    clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+  }
+  .ba__before::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--pos);
+    width: 3px;
+    background: var(--white);
+    transform: translateX(-50%);
+  }
+  .ba__tag {
+    position: absolute;
+    top: 0.75rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    background: rgb(21 25 29 / 80%);
+    color: var(--white);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .ba__tag--l {
+    left: 0.75rem;
+  }
+  .ba__tag--r {
+    right: 0.75rem;
+  }
+  .ba__range {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: ew-resize;
+  }
+  .ba:has(.ba__range:focus-visible) {
+    outline: 3px solid var(--brand);
+    outline-offset: 3px;
+  }
+  .gallery-group {
+    margin-top: 2.5rem;
+  }
+  .gallery-title {
+    font-size: 1.35rem;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  @media (min-width: 900px) {
+    .gallery {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .gallery__link {
+    display: block;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: var(--stone-2);
+  }
+  .gallery__link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .gallery__link:hover :global(img) {
+    transform: scale(1.04);
+  }
+  .lightbox {
+    max-width: min(1200px, 96vw);
+    max-height: 92dvh;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    background: #000;
+  }
+  .lightbox::backdrop {
+    background: rgb(0 0 0 / 85%);
+  }
+  .lightbox img {
+    max-height: 92dvh;
+    width: auto;
+    margin: auto;
+  }
+  .lightbox__close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 90%);
+    cursor: pointer;
+  }
+</style>

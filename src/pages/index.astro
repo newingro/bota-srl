@@ -1,0 +1,419 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import Photo from '../components/Photo.astro';
+import FeaturedWorks from '../components/FeaturedWorks.astro';
+import QuoteSection from '../components/QuoteSection.astro';
+import { images } from '../assets/img';
+import { company } from '../config/site';
+import { mainServices, otherServices, whyUs, processSteps, serviceHref } from '../data/services';
+
+const highlights = [
+  { icon: 'medal', title: `Oltre ${company.yearsOfExperience} anni`, text: 'di esperienza nel settore edile' },
+  { icon: 'user', title: 'Un unico referente', text: 'dal preventivo alla consegna' },
+  { icon: 'calendar', title: 'Tempi e budget', text: 'rispettati, come concordato' },
+  { icon: 'pin', title: 'Firenze e provincia', text: 'e zone limitrofe' },
+];
+---
+
+<Base
+  title="Bota s.r.l. – Impresa edile a Firenze: ristrutturazioni chiavi in mano"
+  description="Impresa edile a Campi Bisenzio (FI): ristrutturazioni chiavi in mano, efficientamento energetico, tetti, facciate e cartongesso a Firenze e provincia. Preventivo gratuito."
+>
+  <section class="hero">
+    <div class="container hero__grid">
+      <div class="hero__content">
+        <p class="eyebrow">Impresa edile · Campi Bisenzio (FI)</p>
+        <h1>Ristrutturazioni chiavi in mano a <span class="hl">Firenze</span> e provincia</h1>
+        <p class="lead">
+          Da oltre {company.yearsOfExperience} anni ristrutturiamo case ed edifici e ne miglioriamo l’efficienza energetica: un unico
+          referente, un preventivo chiaro e il pieno rispetto di tempi e budget.
+        </p>
+        <div class="btn-row">
+          <a href="/contatti/#preventivo" class="btn btn--lg">Richiedi preventivo gratuito <Icon name="arrow" /></a>
+          <a href={company.phone.href} class="btn btn--ghost btn--lg"><Icon name="phone" /> {company.phone.display}</a>
+        </div>
+        <ul class="hero__checks">
+          <li><Icon name="check" size={20} /> Preventivo gratuito e senza impegno</li>
+          <li><Icon name="check" size={20} /> Privati, condomini e aziende</li>
+        </ul>
+      </div>
+      <div class="hero__media">
+        <Photo src={images.hero} alt="Casa toscana in ristrutturazione con ponteggio e tetto in cotto" priority sizes="(min-width: 1024px) 560px, 100vw" />
+      </div>
+    </div>
+  </section>
+
+  <section class="strip" aria-label="Perché sceglierci in breve">
+    <div class="container">
+      <ul class="strip__list">
+        {
+          highlights.map((h) => (
+            <li class="strip__item">
+              <span class="strip__icon"><Icon name={h.icon} /></span>
+              <span><strong>{h.title}</strong> {h.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="servizi-title">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">I nostri servizi</p>
+        <h2 id="servizi-title">Dalla ristrutturazione completa al singolo intervento</h2>
+        <p class="lead">
+          Siamo specializzati in ristrutturazioni chiavi in mano ed efficientamento energetico, ma ci occupiamo anche di bagni, tetti,
+          cartongessi, tinteggiature, facciate e linee vita.
+        </p>
+      </div>
+
+      <div class="main-services">
+        {
+          mainServices.map((s, i) => (
+            <article class="ms-card">
+              <div class="ms-card__media">
+                <Photo src={images[s.image as keyof typeof images]} alt="" sizes="(min-width: 900px) 50vw, 100vw" />
+              </div>
+              <div class="ms-card__body">
+                <span class="card__icon"><Icon name={s.icon} /></span>
+                <h3><a href={serviceHref(s)} class="stretched">{s.title}</a></h3>
+                <p>{s.excerpt}</p>
+                <span class="link-arrow" aria-hidden="true">Scopri di più <Icon name="arrow" /></span>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <div class="grid grid--3 other-services">
+        {
+          otherServices.map((s) => (
+            <article class="card card--link">
+              <span class="card__icon"><Icon name={s.icon} /></span>
+              <h3><a href={serviceHref(s)} class="stretched">{s.title}</a></h3>
+              <p class="muted">{s.excerpt}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--stone" aria-labelledby="processo-title">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">Come lavoriamo</p>
+        <h2 id="processo-title">Dal primo contatto alla consegna, senza sorprese</h2>
+      </div>
+      <ol class="steps">
+        {
+          processSteps.map((s, i) => (
+            <li class="step">
+              <span class="step__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+              <h3>{s.title}</h3>
+              <p>{s.text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="steps__cta"><a href="/contatti/#preventivo" class="btn btn--lg">Inizia ora: richiedi il preventivo <Icon name="arrow" /></a></p>
+    </div>
+  </section>
+
+  <FeaturedWorks server:defer />
+
+  <section class="section section--dark" aria-labelledby="perche-title">
+    <div class="container why">
+      <div class="why__intro">
+        <p class="eyebrow">Perché scegliere Bota s.r.l.</p>
+        <h2 id="perche-title">Professionisti edili a Firenze e provincia</h2>
+        <p class="lead">
+          Un team altamente qualificato che coordina ogni fase del cantiere – e gli altri professionisti coinvolti – per consegnarti
+          un lavoro fatto bene, al giusto prezzo.
+        </p>
+        <a href="/chi-siamo/" class="btn btn--outline-light">Chi siamo <Icon name="arrow" /></a>
+      </div>
+      <ul class="why__list">
+        {
+          whyUs.map((w) => (
+            <li class="why__item">
+              <span class="why__icon"><Icon name={w.icon} /></span>
+              <div>
+                <h3>{w.title}</h3>
+                <p>{w.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <QuoteSection />
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    background: linear-gradient(180deg, var(--stone) 0%, var(--white) 100%);
+    padding-block: clamp(2.5rem, 6vw, 5rem) clamp(2.5rem, 6vw, 4.5rem);
+    overflow: hidden;
+  }
+  .hero__grid {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+  @media (min-width: 1024px) {
+    .hero__grid {
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 3.5rem;
+    }
+  }
+  .hero h1 {
+    max-width: 16ch;
+  }
+  .hl {
+    color: var(--brand-strong);
+  }
+  .hero .lead {
+    max-width: 54ch;
+    margin-bottom: 1.75rem;
+  }
+  .hero__checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .hero__checks li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hero__checks :global(svg) {
+    color: var(--ok);
+  }
+  .hero__media {
+    border-radius: calc(var(--radius) + 6px);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    aspect-ratio: 4 / 3;
+    background: var(--stone-2);
+  }
+  .hero__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .strip {
+    border-block: 1px solid var(--line);
+    background: var(--white);
+  }
+  .strip__list {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 1.5rem 0;
+  }
+  @media (min-width: 640px) {
+    .strip__list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .strip__list {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .strip__item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+    line-height: 1.35;
+  }
+  .strip__item strong {
+    display: block;
+    color: var(--ink);
+    font-size: 1.05rem;
+  }
+  .strip__icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--brand-soft);
+    color: var(--brand-strong);
+  }
+
+  .main-services {
+    display: grid;
+    gap: clamp(1rem, 2.5vw, 1.75rem);
+    margin-bottom: clamp(1rem, 2.5vw, 1.75rem);
+  }
+  @media (min-width: 900px) {
+    .main-services {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ms-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--stone);
+    border: 1px solid var(--line);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .ms-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+  .ms-card__media {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+  .ms-card__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ms-card__body {
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+  .ms-card__body .card__icon {
+    margin-top: -3.4rem;
+    position: relative;
+    width: 60px;
+    height: 60px;
+    background: var(--brand-strong);
+    color: var(--white);
+    box-shadow: var(--shadow);
+  }
+  .ms-card h3 {
+    font-size: clamp(1.35rem, 2.4vw, 1.7rem);
+  }
+  .ms-card h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .ms-card .link-arrow {
+    color: var(--brand-strong);
+  }
+  .other-services h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .steps {
+    display: grid;
+    gap: 1.25rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: step;
+  }
+  @media (min-width: 640px) {
+    .steps {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .steps {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .step {
+    position: relative;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+  }
+  .step__num {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--brand-strong);
+    letter-spacing: -0.04em;
+  }
+  .step h3 {
+    font-size: 1.15rem;
+  }
+  .step p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 0.975rem;
+  }
+  .steps__cta {
+    margin: 2rem 0 0;
+    text-align: center;
+  }
+
+
+  .why {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .why {
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+  }
+  .why__list {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  @media (min-width: 640px) {
+    .why__list {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .why__item {
+    display: grid;
+    gap: 0.9rem;
+    padding: 1.4rem;
+    border-radius: var(--radius);
+    background: var(--dark-2);
+    border: 1px solid #36424b;
+  }
+  .why__item h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.35em;
+  }
+  .why__item p {
+    margin: 0;
+    color: var(--on-dark-muted);
+    font-size: 0.95rem;
+  }
+  .why__icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgb(240 138 93 / 14%);
+    color: var(--accent-on-dark);
+  }
+</style>

@@ -1,0 +1,102 @@
+---
+import type { Work } from '../lib/works';
+import UploadedImage from './UploadedImage.astro';
+import Icon from './Icon.astro';
+import { plain } from '../lib/format';
+interface Props { work: Work; headingLevel?: 'h2' | 'h3'; priority?: boolean }
+const { work, headingLevel = 'h3', priority = false } = Astro.props;
+const H = headingLevel;
+---
+
+<article class="wcard">
+  <div class="wcard__media">
+    {work.cover ? <UploadedImage image={work.cover} alt="" priority={priority} sizes="(min-width: 1260px) 380px, (min-width: 900px) 30vw, (min-width: 640px) 46vw, calc(100vw - 2rem)" /> : <div class="wcard__empty"><Icon name="image" size={40} /></div>}
+    {work.service && <span class="badge wcard__badge">{work.service}</span>}
+  </div>
+  <div class="wcard__body">
+    <H class="wcard__title"><a href={`/lavori/${work.slug}/`} class="stretched">{work.title}</a></H>
+    <p class="wcard__meta">
+      {work.location && <span><Icon name="pin" size={16} /> {work.location}</span>}
+      {work.year && <span><Icon name="calendar" size={16} /> {work.year}</span>}
+    </p>
+    {work.summary && <p class="wcard__text">{plain(work.summary, 140)}</p>}
+    <span class="link-arrow" aria-hidden="true">Leggi il caso studio <Icon name="arrow" /></span>
+  </div>
+</article>
+
+<style>
+  .wcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .wcard:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+  .wcard__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    background: var(--stone-2);
+  }
+  .wcard__media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .wcard__empty {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--muted);
+  }
+  .wcard__badge {
+    position: absolute;
+    left: 0.85rem;
+    top: 0.85rem;
+    background: rgb(255 255 255 / 94%);
+  }
+  .wcard__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.25rem 1.35rem 1.4rem;
+    flex: 1;
+  }
+  .wcard__title {
+    font-size: 1.2rem;
+    margin: 0;
+  }
+  .wcard__title a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .wcard__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .wcard__meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .wcard__text {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+  }
+  .wcard .link-arrow {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    color: var(--brand-strong);
+  }
+</style>

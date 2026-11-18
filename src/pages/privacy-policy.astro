@@ -1,0 +1,157 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { company, legal } from '../config/site';
+
+/*
+ * NOTA PER IL TITOLARE: questo testo è una base redatta sulla configurazione tecnica reale del sito.
+ * Prima della pubblicazione va verificato da Bota s.r.l. (titolare del trattamento), in particolare
+ * l'elenco dei fornitori (sezione 6) che deve corrispondere ai servizi effettivamente attivati.
+ */
+const updated = new Date(legal.privacyVersion).toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Privacy policy', path: '/privacy-policy/' },
+];
+---
+
+<Base title="Privacy policy" description="Informativa sul trattamento dei dati personali degli utenti del sito bota.srl ai sensi degli artt. 13 e 14 del Regolamento UE 2016/679 (GDPR)." breadcrumbs={crumbs}>
+  <PageHero crumbs={crumbs} title="Informativa privacy" lead={`Ai sensi degli artt. 13 e 14 del Regolamento (UE) 2016/679 (“GDPR”). Ultimo aggiornamento: ${updated}.`} />
+
+  <section class="section">
+    <div class="container">
+      <div class="prose">
+        <h2 id="titolare">1. Titolare del trattamento</h2>
+        <p>
+          <strong>{company.legalName}</strong>, con sede in {company.address.street}, {company.address.postalCode} {company.address.city} ({company.address.province}),
+          P.IVA / C.F. {company.vat}.<br />
+          Email: <a href={`mailto:${company.email}`}>{company.email}</a> – Tel. <a href={company.phone.href}>{company.phone.display}</a>.
+        </p>
+        <p>Il Titolare non ha nominato un Responsabile della protezione dei dati (DPO), non essendo obbligato ai sensi dell’art. 37 GDPR.</p>
+
+        <h2 id="dati">2. Quali dati trattiamo</h2>
+        <ul>
+          <li>
+            <strong>Dati di navigazione</strong>: i sistemi che fanno funzionare il sito acquisiscono, nel normale esercizio, alcuni dati tecnici
+            (indirizzo IP, tipo di browser, pagine richieste, data e ora) necessari a erogare il servizio e a garantirne la sicurezza.
+          </li>
+          <li>
+            <strong>Dati forniti con il modulo di richiesta preventivo</strong>: nome e cognome, telefono, email, comune dell’immobile, tipo di
+            intervento, tempistiche e descrizione del lavoro, oltre alla pagina di provenienza e agli eventuali parametri della campagna
+            pubblicitaria da cui sei arrivato (es. utm, gclid).
+          </li>
+          <li>
+            <strong>Dati per la newsletter</strong>: indirizzo email e, come prova del consenso, data e ora dell’iscrizione e della conferma, testo
+            del consenso prestato, indirizzo IP troncato e tipo di browser.
+          </li>
+          <li><strong>Dati raccolti tramite cookie e strumenti analoghi</strong>: vedi la <a href="/cookie-policy/">cookie policy</a>.</li>
+          <li><strong>Dati che ci comunichi direttamente</strong> via email, telefono o WhatsApp.</li>
+        </ul>
+        <p>Ti chiediamo di non inserire nel modulo dati particolari (es. relativi alla salute) non necessari alla richiesta.</p>
+
+        <h2 id="finalita">3. Finalità, basi giuridiche e tempi di conservazione</h2>
+        <table>
+          <thead>
+            <tr><th scope="col">Finalità</th><th scope="col">Base giuridica</th><th scope="col">Conservazione</th></tr>
+          </thead>
+          <tbody>
+            <tr id="preventivi">
+              <td><strong>Rispondere alla richiesta di preventivo o di contatto</strong>: ricontattarti, eseguire eventuali sopralluoghi, inviarti il preventivo; inviarti l’email automatica di conferma di ricezione.</td>
+              <td>Esecuzione di misure precontrattuali adottate su tua richiesta (art. 6.1.b GDPR).</td>
+              <td>24 mesi dalla richiesta se non segue alcun contratto; in caso di contratto, per la durata del rapporto e per 10 anni dalla sua conclusione (obblighi civilistici e fiscali).</td>
+            </tr>
+            <tr id="newsletter">
+              <td><strong>Newsletter</strong>: invio via email di offerte, coupon e novità di Bota s.r.l., previa conferma dell’iscrizione (doppio consenso).</td>
+              <td>Consenso (art. 6.1.a GDPR), revocabile in ogni momento.</td>
+              <td>Fino alla revoca del consenso. La prova del consenso e della revoca è conservata per ulteriori 24 mesi, a tutela del Titolare.</td>
+            </tr>
+            <tr>
+              <td><strong>Statistiche di utilizzo del sito</strong> (Google Analytics 4).</td>
+              <td>Consenso (art. 6.1.a GDPR) espresso tramite il banner cookie.</td>
+              <td>14 mesi per i dati statistici aggregati in Google Analytics.</td>
+            </tr>
+            <tr>
+              <td><strong>Misurazione delle campagne e pubblicità personalizzata</strong> (Google Ads, Meta Pixel).</td>
+              <td>Consenso (art. 6.1.a GDPR) espresso tramite il banner cookie.</td>
+              <td>Secondo le durate indicate nella cookie policy.</td>
+            </tr>
+            <tr>
+              <td><strong>Registro dei consensi cookie</strong>: conservare la prova delle scelte espresse nel banner.</td>
+              <td>Obbligo di dimostrare il consenso (artt. 6.1.c e 7.1 GDPR).</td>
+              <td>Per la validità della scelta (6 mesi) e per i successivi 12 mesi.</td>
+            </tr>
+            <tr>
+              <td><strong>Sicurezza del sito e prevenzione di abusi e spam</strong> (es. limiti agli invii ripetuti, tramite IP in forma pseudonimizzata).</td>
+              <td>Legittimo interesse del Titolare (art. 6.1.f GDPR).</td>
+              <td>Fino a 30 giorni per i log tecnici; insieme alla richiesta per l’identificativo pseudonimizzato associato.</td>
+            </tr>
+            <tr>
+              <td><strong>Adempimento di obblighi di legge</strong> e accertamento, esercizio o difesa di un diritto in sede giudiziaria.</td>
+              <td>Obbligo legale (art. 6.1.c) e legittimo interesse (art. 6.1.f GDPR).</td>
+              <td>Per il tempo previsto dalla legge o necessario alla tutela del diritto.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="conferimento">4. Natura del conferimento</h2>
+        <p>
+          Il conferimento dei dati contrassegnati come obbligatori nel modulo di richiesta preventivo è necessario per poterti ricontattare:
+          in mancanza non potremo dare seguito alla richiesta. L’iscrizione alla newsletter e il consenso ai cookie non tecnici sono
+          facoltativi e il loro rifiuto non ha alcuna conseguenza sulla possibilità di navigare il sito o di richiedere un preventivo.
+        </p>
+
+        <h2 id="modalita">5. Modalità del trattamento</h2>
+        <p>
+          I dati sono trattati con strumenti informatici e, se necessario, cartacei, da personale autorizzato e istruito, adottando misure di
+          sicurezza adeguate: connessione cifrata (HTTPS), accesso all’area di gestione protetto da credenziali personali, password conservate
+          in forma cifrata, rimozione dei metadati (incluse le coordinate GPS) dalle foto pubblicate, backup e aggiornamenti periodici. Non
+          effettuiamo processi decisionali automatizzati né profilazione, salvo quanto eventualmente svolto dai servizi pubblicitari di terze
+          parti cui hai acconsentito.
+        </p>
+
+        <h2 id="destinatari">6. A chi comunichiamo i dati</h2>
+        <p>I dati non sono diffusi. Possono essere trattati, per conto del Titolare e in qualità di responsabili del trattamento (art. 28 GDPR), da:</p>
+        <ul>
+          <li>fornitori di hosting e infrastruttura del sito (Vercel Inc.) e del database (Turso / ChiselStrike Inc.);</li>
+          <li>fornitori dei servizi di posta elettronica utilizzati per inviare le email di conferma e la newsletter;</li>
+          <li>l’agenzia che cura la realizzazione, la manutenzione e l’assistenza tecnica del sito;</li>
+          <li>consulenti e professionisti (es. commercialista, legale) per gli adempimenti di legge e la tutela dei diritti.</li>
+        </ul>
+        <p>
+          Previo tuo consenso, i dati raccolti tramite cookie sono trattati da Google Ireland Ltd. (Google Analytics, Google Ads, Google Maps)
+          e Meta Platforms Ireland Ltd. (Meta Pixel), come descritto nella <a href="/cookie-policy/">cookie policy</a>. L’elenco aggiornato dei
+          responsabili è disponibile su richiesta.
+        </p>
+
+        <h2 id="trasferimenti">7. Trasferimenti fuori dall’Unione Europea</h2>
+        <p>
+          Alcuni fornitori hanno sede o infrastrutture negli Stati Uniti. In tali casi il trasferimento avviene sulla base della decisione di
+          adeguatezza della Commissione Europea relativa all’EU-U.S. Data Privacy Framework (per i fornitori certificati) oppure delle Clausole
+          Contrattuali Standard approvate dalla Commissione (art. 46 GDPR), con le misure supplementari eventualmente necessarie.
+        </p>
+
+        <h2 id="diritti">8. I tuoi diritti</h2>
+        <p>In qualsiasi momento puoi chiedere al Titolare, scrivendo a <a href={`mailto:${company.email}`}>{company.email}</a>:</p>
+        <ul>
+          <li>l’accesso ai tuoi dati e una copia degli stessi (art. 15);</li>
+          <li>la rettifica dei dati inesatti o l’integrazione di quelli incompleti (art. 16);</li>
+          <li>la cancellazione (art. 17) o la limitazione del trattamento (art. 18);</li>
+          <li>la portabilità dei dati forniti, in formato strutturato (art. 20);</li>
+          <li>di opporti al trattamento basato sul legittimo interesse (art. 21);</li>
+          <li>di revocare il consenso in qualsiasi momento, senza pregiudicare la liceità del trattamento basato sul consenso prima della revoca (art. 7.3).</li>
+        </ul>
+        <p>
+          Puoi annullare l’iscrizione alla newsletter con il link presente in ogni email e modificare le scelte sui cookie con il link
+          “Preferenze cookie” a fondo pagina. Hai inoltre il diritto di proporre reclamo al Garante per la protezione dei dati personali
+          (<a href="https://www.garanteprivacy.it" rel="noopener" target="_blank">www.garanteprivacy.it</a>).
+        </p>
+
+        <h2 id="modifiche">9. Modifiche a questa informativa</h2>
+        <p>
+          Il Titolare può aggiornare la presente informativa; le modifiche sono pubblicate su questa pagina con l’indicazione della data di
+          ultimo aggiornamento. In caso di modifiche sostanziali riguardanti i cookie, il banner verrà riproposto.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>

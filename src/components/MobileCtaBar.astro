@@ -1,0 +1,58 @@
+---
+import Icon from './Icon.astro';
+import { company } from '../config/site';
+---
+
+<nav class="mcta" aria-label="Contatto rapido">
+  <a href={company.phone.href} class="mcta__item" data-track="click_call">
+    <Icon name="phone" size={22} /><span>Chiama</span>
+  </a>
+  <a href={company.whatsapp.href} class="mcta__item" rel="noopener" target="_blank" data-track="click_whatsapp">
+    <Icon name="whatsapp" size={22} /><span>WhatsApp</span>
+  </a>
+  <a href="/contatti/#preventivo" class="mcta__item mcta__item--primary">
+    <Icon name="send" size={22} /><span>Preventivo</span>
+  </a>
+</nav>
+
+<style>
+  .mcta {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.3fr;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom));
+    background: rgb(255 255 255 / 97%);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -6px 20px rgb(21 25 29 / 8%);
+  }
+  .mcta__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 48px;
+    border-radius: 12px;
+    background: var(--stone);
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .mcta__item:hover {
+    color: var(--ink);
+    background: var(--stone-2);
+  }
+  .mcta__item--primary,
+  .mcta__item--primary:hover {
+    background: var(--brand-strong);
+    color: var(--white);
+  }
+  @media (min-width: 1024px) {
+    .mcta {
+      display: none;
+    }
+  }
+</style>

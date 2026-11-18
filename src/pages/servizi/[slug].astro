@@ -1,0 +1,152 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import QuoteSection from '../../components/QuoteSection.astro';
+import { images } from '../../assets/img';
+import { mainServices, otherServices, processSteps, serviceHref, type Service } from '../../data/services';
+
+export function getStaticPaths() {
+  return mainServices.map((s) => ({ params: { slug: s.slug }, props: { service: s } }));
+}
+
+const { service } = Astro.props as { service: Service };
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Servizi', path: '/servizi/' },
+  { name: service.title, path: `/servizi/${service.slug}/` },
+];
+const preselect = service.slug === 'efficientamento-energetico' ? 'Efficientamento energetico / cappotto termico' : 'Ristrutturazione chiavi in mano';
+const others = mainServices.filter((s) => s.slug !== service.slug);
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.title,
+    serviceType: service.title,
+    description: service.seoDescription,
+    provider: { '@id': 'https://bota.srl/#impresa' },
+    areaServed: { '@type': 'AdministrativeArea', name: 'Città metropolitana di Firenze' },
+  },
+];
+---
+
+<Base title={service.seoTitle!} description={service.seoDescription!} breadcrumbs={crumbs} jsonLd={ld}>
+  <PageHero crumbs={crumbs} eyebrow="Servizi" title={service.title} lead={service.excerpt}>
+    <div class="btn-row hero-cta">
+      <a href="#preventivo" class="btn btn--lg">Richiedi preventivo gratuito <Icon name="arrow" /></a>
+    </div>
+  </PageHero>
+
+  <section class="section">
+    <div class="container detail">
+      <div class="detail__text">
+        {service.body.map((p, i) => <p class={i === 0 ? 'lead' : ''}>{p}</p>)}
+        {
+          service.points && (
+            <>
+              <h2 class="detail__h">Cosa comprende</h2>
+              <ul class="checklist checklist--2">
+                {service.points.map((p) => <li>{p}</li>)}
+              </ul>
+            </>
+          )
+        }
+      </div>
+      <div class="detail__media media">
+        <Photo src={images[service.image as keyof typeof images]} alt="" priority sizes="(min-width: 1024px) 45vw, 100vw" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--stone" aria-labelledby="come">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Come funziona</p>
+        <h2 id="come">Quattro passi, un unico referente</h2>
+      </div>
+      <ol class="mini-steps">
+        {processSteps.map((s, i) => (<li><span aria-hidden="true">{i + 1}</span><div><h3>{s.title}</h3><p>{s.text}</p></div></li>))}
+      </ol>
+      <p class="also">
+        Guarda i <a href="/lavori/">lavori realizzati</a> oppure scopri anche:
+        {others.map((o) => <a href={serviceHref(o)}>{o.title}</a>)}
+        {otherServices.slice(1, 4).map((o) => <a href={serviceHref(o)}>{o.title}</a>)}
+      </p>
+    </div>
+  </section>
+
+  <QuoteSection preselect={preselect} heading={`Preventivo per ${service.title.toLowerCase()}`} />
+</Base>
+
+<style>
+  .hero-cta {
+    margin-top: 1.75rem;
+  }
+  .detail {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .detail {
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+  .detail__h {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+  }
+  .detail__media {
+    aspect-ratio: 4 / 3;
+  }
+  .mini-steps {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  @media (min-width: 900px) {
+    .mini-steps {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .mini-steps li {
+    display: flex;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .mini-steps span {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--brand-strong);
+    color: var(--white);
+    font-weight: 800;
+  }
+  .mini-steps h3 {
+    font-size: 1.05rem;
+    margin-bottom: 0.3em;
+  }
+  .mini-steps p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ink-2);
+  }
+  .also {
+    margin: 2rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+</style>

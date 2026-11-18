@@ -1,0 +1,325 @@
+---
+import Icon from './Icon.astro';
+/**
+ * Banner cookie conforme alle Linee guida del Garante (10 giugno 2021):
+ * - comando "X" di chiusura = mantiene le impostazioni di default (solo cookie tecnici);
+ * - pulsanti "Rifiuta" e "Accetta" con pari evidenza;
+ * - nessuna casella preselezionata, scroll e navigazione NON valgono come consenso;
+ * - link alla cookie policy e pannello per scelte granulari per finalità.
+ */
+const categories = [
+  {
+    id: 'nec',
+    title: 'Necessari',
+    locked: true,
+    text: 'Indispensabili al funzionamento del sito e alla memorizzazione delle tue scelte sui cookie. Non richiedono consenso.',
+    services: 'Bota (cookie tecnici di prima parte)',
+  },
+  {
+    id: 'exp',
+    title: 'Contenuti esterni (mappe)',
+    text: 'Permettono di visualizzare la mappa interattiva di Google Maps, che può installare cookie di Google.',
+    services: 'Google Maps – Google Ireland Ltd.',
+  },
+  {
+    id: 'stat',
+    title: 'Statistiche',
+    text: 'Ci aiutano a capire in forma aggregata come viene usato il sito (pagine visitate, provenienza delle visite) per migliorarlo.',
+    services: 'Google Analytics 4 – Google Ireland Ltd.',
+  },
+  {
+    id: 'mkt',
+    title: 'Marketing',
+    text: 'Servono a misurare l’efficacia delle nostre campagne pubblicitarie e a mostrarti annunci pertinenti su altri siti e social.',
+    services: 'Google Ads – Google Ireland Ltd.; Meta Pixel – Meta Platforms Ireland Ltd.',
+  },
+];
+---
+
+<section class="cc" id="cookie-banner" aria-label="Informativa sui cookie" hidden>
+  <div class="cc__box">
+    <button type="button" class="cc__close" data-cc="reject" aria-label="Chiudi e continua senza accettare">
+      <Icon name="close" size={20} />
+    </button>
+    <p class="cc__title"><Icon name="cookie" size={20} /> Rispettiamo la tua privacy</p>
+    <p class="cc__text">
+      Usiamo cookie tecnici necessari e, solo con il tuo consenso, cookie di terze parti per statistiche, marketing e
+      mappe. Puoi accettare, rifiutare o personalizzare; chiudendo con la X continui senza accettare. Cambi idea quando
+      vuoi da «Preferenze cookie». <a href="/cookie-policy/">Cookie policy</a>
+    </p>
+    <div class="cc__actions">
+      <button type="button" class="btn btn--ghost" data-cc="customize">Personalizza</button>
+      <button type="button" class="btn btn--ghost cc__equal" data-cc="reject">Rifiuta</button>
+      <button type="button" class="btn cc__equal" data-cc="accept">Accetta tutti</button>
+    </div>
+  </div>
+</section>
+
+<dialog class="ccd" id="cookie-preferences" aria-labelledby="ccd-title">
+  <form method="dialog" class="ccd__form">
+    <div class="ccd__head">
+      <h2 id="ccd-title">Preferenze cookie</h2>
+      <button type="submit" value="cancel" class="cc__close" aria-label="Chiudi pannello preferenze"><Icon name="close" size={20} /></button>
+    </div>
+    <p class="ccd__intro">
+      Scegli per quali finalità acconsenti all’uso di cookie e strumenti di tracciamento. Puoi modificare le scelte in
+      qualsiasi momento. Dettagli nella <a href="/cookie-policy/">cookie policy</a>.
+    </p>
+    <ul class="ccd__list">
+      {
+        categories.map((c) => (
+          <li class="ccd__item">
+            <div class="ccd__row">
+              {c.locked ? <span class="ccd__label">{c.title}</span> : <label class="ccd__label" for={`cc-${c.id}`}>{c.title}</label>}
+              {c.locked ? (
+                <span class="ccd__always">Sempre attivi</span>
+              ) : (
+                <input class="switch" type="checkbox" role="switch" id={`cc-${c.id}`} name={c.id} />
+              )}
+            </div>
+            <p class="ccd__desc">{c.text}</p>
+            <p class="ccd__services"><strong>Servizi:</strong> {c.services}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="ccd__actions">
+      <button type="button" class="btn btn--ghost" data-cc="reject">Rifiuta tutti</button>
+      <button type="button" class="btn btn--ghost" data-cc="save">Salva le mie scelte</button>
+      <button type="button" class="btn" data-cc="accept">Accetta tutti</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  import { init, saveConsent, getConsent, type Choices } from '../scripts/consent';
+
+  const banner = document.getElementById('cookie-banner')!;
+  const dialog = document.getElementById('cookie-preferences') as HTMLDialogElement;
+  const sw = (id: string) => dialog.querySelector<HTMLInputElement>(`#cc-${id}`)!;
+
+  const hideBanner = () => (banner.hidden = true);
+  const choose = (c: Choices, action: string) => {
+    saveConsent(c, action);
+    hideBanner();
+    if (dialog.open) dialog.close();
+  };
+
+  function openPreferences() {
+    const c = getConsent();
+    sw('exp').checked = !!c?.exp;
+    sw('stat').checked = !!c?.stat;
+    sw('mkt').checked = !!c?.mkt;
+    dialog.showModal();
+  }
+
+  document.addEventListener('click', (e) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>('[data-cc], [data-cookie-preferences]');
+    if (!target) return;
+    if (target.hasAttribute('data-cookie-preferences')) return openPreferences();
+    switch (target.dataset.cc) {
+      case 'accept':
+        return choose({ exp: true, stat: true, mkt: true }, 'accept_all');
+      case 'reject':
+        return choose({ exp: false, stat: false, mkt: false }, target.closest('dialog') ? 'reject_all' : target.classList.contains('cc__close') ? 'close_x' : 'reject_all');
+      case 'customize':
+        return openPreferences();
+      case 'save':
+        return choose({ exp: sw('exp').checked, stat: sw('stat').checked, mkt: sw('mkt').checked }, 'custom');
+    }
+  });
+
+  init(() => {
+    banner.hidden = false;
+  });
+</script>
+
+<style>
+  .cc {
+    position: fixed;
+    z-index: 100;
+    inset: auto 0 0 0;
+    padding: 0.75rem;
+  }
+  .cc__box {
+    position: relative;
+    max-width: 980px;
+    margin-inline: auto;
+    padding: 1.15rem 1.25rem 1.25rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+  }
+  .cc__title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 2.5rem 0.4rem 0;
+    font-weight: 750;
+    font-size: 1rem;
+  }
+  .cc__title :global(svg) {
+    color: var(--brand-strong);
+  }
+  .cc__text {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .cc__actions,
+  .ccd__actions {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .cc__actions .btn,
+  .ccd__actions .btn {
+    min-height: 46px;
+    font-size: 0.95rem;
+    padding-inline: 1.1rem;
+  }
+  @media (min-width: 720px) {
+    .cc__box {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      column-gap: 1.5rem;
+      align-items: end;
+    }
+    .cc__title {
+      grid-column: 1 / -1;
+    }
+    .cc__text {
+      margin: 0;
+    }
+    .cc__actions {
+      grid-auto-flow: column;
+    }
+  }
+  @media (max-width: 719px) {
+    .cc__actions {
+      grid-template-columns: 1fr 1fr;
+    }
+    .cc__actions [data-cc='customize'] {
+      grid-column: 1 / -1;
+      order: 3;
+    }
+  }
+  .cc__close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .cc__close:hover {
+    background: var(--stone);
+  }
+
+  .ccd {
+    width: min(640px, calc(100% - 1.5rem));
+    max-height: calc(100dvh - 1.5rem);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    color: var(--ink);
+  }
+  .ccd::backdrop {
+    background: rgb(21 25 29 / 55%);
+  }
+  .ccd__form {
+    padding: 1.5rem;
+  }
+  .ccd__head {
+    position: relative;
+  }
+  .ccd__head h2 {
+    font-size: 1.4rem;
+    margin: 0 3rem 0.6rem 0;
+  }
+  .ccd__head .cc__close {
+    top: -0.4rem;
+    right: -0.4rem;
+  }
+  .ccd__intro {
+    font-size: 0.925rem;
+    color: var(--ink-2);
+  }
+  .ccd__list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.25rem;
+    display: grid;
+    gap: 0.75rem;
+  }
+  .ccd__item {
+    padding: 1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+  }
+  .ccd__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .ccd__label {
+    font-weight: 700;
+  }
+  .ccd__always {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ok);
+  }
+  .ccd__desc,
+  .ccd__services {
+    margin: 0.4rem 0 0;
+    font-size: 0.875rem;
+    color: var(--ink-2);
+  }
+  .ccd__services {
+    color: var(--muted);
+  }
+  @media (min-width: 560px) {
+    .ccd__actions {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .switch {
+    appearance: none;
+    flex: none;
+    position: relative;
+    width: 52px;
+    height: 30px;
+    margin: 0;
+    border-radius: 999px;
+    background: #8a939b;
+    cursor: pointer;
+    transition: background 0.18s ease;
+  }
+  .switch::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--white);
+    transition: transform 0.18s ease;
+  }
+  .switch:checked {
+    background: var(--brand-strong);
+  }
+  .switch:checked::after {
+    transform: translateX(22px);
+  }
+</style>

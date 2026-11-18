@@ -1,0 +1,127 @@
+---
+import Icon from './Icon.astro';
+import { company, fullAddress } from '../config/site';
+/**
+ * Mappa "click-to-load": l'iframe di Google Maps (che installa cookie di terze parti)
+ * viene caricato solo dopo il consenso per i contenuti esterni. Nel frattempo viene
+ * mostrata un'anteprima locale leggera con indirizzo e link diretto a Google Maps.
+ */
+---
+
+<div class="map" data-map data-src={company.mapsEmbedUrl}>
+  <div class="map__placeholder">
+    <svg class="map__bg" viewBox="0 0 800 450" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+      <rect width="800" height="450" fill="#e9e3da" />
+      <path d="M0 300C150 260 260 330 420 290s260-90 380-60" stroke="#c7d6dc" stroke-width="34" fill="none" />
+      <path d="M-20 120 820 210M150-20 260 470M520-20 610 470M0 400 800 330" stroke="#fff" stroke-width="14" />
+      <path d="M-20 60 820 90M60-20 40 470M380-20 400 470M700-20 720 470" stroke="#fff" stroke-width="6" />
+      <g fill="#d9d1c4"><rect x="280" y="120" width="80" height="60" rx="4" /><rect x="430" y="100" width="70" height="80" rx="4" /><rect x="280" y="230" width="90" height="40" rx="4" /><rect x="640" y="240" width="70" height="60" rx="4" /><rect x="70" y="180" width="60" height="70" rx="4" /></g>
+    </svg>
+    <div class="map__pin" aria-hidden="true"><Icon name="pin" size={34} /></div>
+    <div class="map__card">
+      <p class="map__name">{company.name}</p>
+      <p class="map__addr">{fullAddress}</p>
+      <div class="map__actions">
+        <a class="btn" href={company.mapsUrl} target="_blank" rel="noopener">Indicazioni stradali <Icon name="external" /></a>
+        <button type="button" class="btn btn--ghost" data-map-load><Icon name="map" /> Mostra mappa interattiva</button>
+      </div>
+      <p class="map__note">La mappa interattiva è fornita da Google e può installare cookie di terze parti. Cliccando acconsenti al loro uso (<a href="/cookie-policy/">cookie policy</a>).</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { grant, hasConsent } from '../scripts/consent';
+
+  const load = (el: HTMLElement) => {
+    if (el.querySelector('iframe')) return;
+    const iframe = document.createElement('iframe');
+    iframe.src = el.dataset.src!;
+    iframe.title = 'Mappa: sede di Bota s.r.l. a Campi Bisenzio';
+    iframe.loading = 'lazy';
+    iframe.referrerPolicy = 'no-referrer-when-downgrade';
+    iframe.className = 'map__iframe';
+    el.querySelector('.map__placeholder')?.remove();
+    el.appendChild(iframe);
+  };
+  const maps = document.querySelectorAll<HTMLElement>('[data-map]');
+  if (hasConsent('exp')) maps.forEach(load);
+  document.addEventListener('consent:change', (e) => {
+    if ((e as CustomEvent).detail?.exp) maps.forEach(load);
+  });
+  maps.forEach((m) =>
+    m.querySelector('[data-map-load]')?.addEventListener('click', () => {
+      grant('exp');
+      load(m);
+    }),
+  );
+</script>
+
+<style>
+  .map {
+    position: relative;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--stone-2);
+    min-height: 420px;
+  }
+  .map__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: end center;
+    padding: 1rem;
+  }
+  .map__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .map__pin {
+    position: absolute;
+    left: 50%;
+    top: 28%;
+    transform: translate(-50%, -50%);
+    color: var(--brand-strong);
+    filter: drop-shadow(0 4px 6px rgb(0 0 0 / 20%));
+  }
+  .map__card {
+    position: relative;
+    width: min(100%, 520px);
+    padding: 1.25rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .map__name {
+    margin: 0;
+    font-weight: 750;
+    font-size: 1.1rem;
+  }
+  .map__addr {
+    margin: 0 0 1rem;
+    color: var(--ink-2);
+  }
+  .map__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .map__actions .btn {
+    min-height: 44px;
+    font-size: 0.95rem;
+    padding: 0.6rem 1rem;
+  }
+  .map__note {
+    margin: 0.85rem 0 0;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .map :global(.map__iframe) {
+    width: 100%;
+    height: 450px;
+    border: 0;
+  }
+</style>

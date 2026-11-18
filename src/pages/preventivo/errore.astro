@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { company } from '../../config/site';
+---
+
+<Base title="Invio non riuscito" description="Non è stato possibile inviare la richiesta." noindex>
+  <section class="section">
+    <div class="container container--narrow">
+      <h1>Non siamo riusciti a inviare la richiesta</h1>
+      <p class="lead">Controlla di aver compilato i campi obbligatori (nome, telefono, email, tipo di intervento e presa visione dell’informativa) e riprova.</p>
+      <div class="btn-row">
+        <a class="btn" href="/contatti/#preventivo">Torna al modulo</a>
+        <a class="btn btn--ghost" href={company.phone.href}><Icon name="phone" /> Chiama {company.phone.display}</a>
+      </div>
+    </div>
+  </section>
+</Base>

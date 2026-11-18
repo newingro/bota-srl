@@ -1,0 +1,141 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import QuoteSection from '../components/QuoteSection.astro';
+import MapEmbed from '../components/MapEmbed.astro';
+import Icon from '../components/Icon.astro';
+import { company } from '../config/site';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Contatti', path: '/contatti/' },
+];
+const ld = [{ '@context': 'https://schema.org', '@type': 'ContactPage', name: 'Contatti – Bota s.r.l.', about: { '@id': 'https://bota.srl/#impresa' } }];
+---
+
+<Base
+  title="Contatti e preventivo gratuito"
+  description="Contatta Bota s.r.l., impresa edile in Via Semita 50 a Campi Bisenzio (FI): tel. 055 293285, cell. 338 6808517, info@bota.srl. Richiedi un preventivo gratuito online."
+  breadcrumbs={crumbs}
+  jsonLd={ld}
+  hideMobileCta
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Contatti"
+    title="Parliamo del tuo progetto"
+    lead="Compila il modulo per ricevere un preventivo gratuito oppure contattaci direttamente: ti rispondiamo negli orari d’ufficio."
+  >
+    <ul class="quick">
+      <li><a href={company.phone.href}><Icon name="phone" /> <span><small>Telefono</small>{company.phone.display}</span></a></li>
+      <li><a href={company.mobile.href}><Icon name="mobile" /> <span><small>Cellulare</small>{company.mobile.display}</span></a></li>
+      <li><a href={`mailto:${company.email}`}><Icon name="mail" /> <span><small>Email</small>{company.email}</span></a></li>
+      <li><a href={company.mapsUrl} target="_blank" rel="noopener"><Icon name="pin" /> <span><small>Sede</small>{company.address.street}, {company.address.city}</span></a></li>
+    </ul>
+  </PageHero>
+
+  <QuoteSection heading="Richiedi il tuo preventivo gratuito" />
+
+  <section class="section" aria-labelledby="dove">
+    <div class="container where">
+      <div>
+        <p class="eyebrow">Dove siamo</p>
+        <h2 id="dove">La nostra sede a Campi Bisenzio</h2>
+        <address>
+          <strong>{company.legalName}</strong><br />
+          {company.address.street}<br />
+          {company.address.postalCode} {company.address.city} ({company.address.province})<br />
+          P.IVA / C.F. {company.vat}
+        </address>
+        <h3 class="where__h">Orari ufficio</h3>
+        <dl class="hours">
+          {company.hours.map((h) => (<div><dt>{h.days}</dt><dd>{h.value}</dd></div>))}
+        </dl>
+        <p class="muted">Operiamo in tutta la provincia di Firenze e nelle zone limitrofe.</p>
+      </div>
+      <MapEmbed />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .quick {
+    display: grid;
+    gap: 0.75rem;
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0 0;
+  }
+  @media (min-width: 640px) {
+    .quick {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (min-width: 1100px) {
+    .quick {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .quick a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    height: 100%;
+    padding: 0.9rem 1rem;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font-weight: 700;
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .quick a:hover {
+    border-color: var(--brand);
+  }
+  .quick :global(svg) {
+    flex: none;
+    color: var(--brand-strong);
+  }
+  .quick small {
+    display: block;
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .where {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .where {
+      grid-template-columns: 0.8fr 1.2fr;
+      gap: 4rem;
+      align-items: start;
+    }
+  }
+  address {
+    font-style: normal;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+  }
+  .where__h {
+    font-size: 1.15rem;
+  }
+  .hours {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0 0 1.5rem;
+    max-width: 360px;
+  }
+  .hours div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed var(--line);
+    padding-bottom: 0.4rem;
+  }
+  .hours dd {
+    margin: 0;
+    font-weight: 700;
+  }
+</style>

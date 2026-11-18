@@ -1,0 +1,50 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { confirm } from '../../lib/newsletter';
+import { clientIp } from '../../lib/security';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'no-store');
+const token = Astro.url.searchParams.get('t') || '';
+const ok = token ? await confirm(token, clientIp(Astro.request, Astro.clientAddress)) : false;
+---
+
+<Base title="Conferma iscrizione newsletter" description="Conferma dell'iscrizione alla newsletter di Bota s.r.l." noindex>
+  <section class="section">
+    <div class="container container--narrow center">
+      {
+        ok ? (
+          <>
+            <span class="ok-icon"><Icon name="check" size={44} /></span>
+            <h1>Iscrizione confermata!</h1>
+            <p class="lead">Da ora riceverai offerte, coupon e novità di Bota s.r.l. Puoi annullare l’iscrizione in qualsiasi momento dal link presente in ogni email.</p>
+            <a class="btn" href="/">Torna al sito</a>
+          </>
+        ) : (
+          <>
+            <h1>Link non valido o scaduto</h1>
+            <p class="lead">Non siamo riusciti a confermare l’iscrizione. Prova a iscriverti di nuovo dal modulo in fondo alla pagina.</p>
+            <a class="btn" href="/#contenuto">Torna al sito</a>
+          </>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .center {
+    text-align: center;
+  }
+  .ok-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    margin-bottom: 1.5rem;
+    border-radius: 50%;
+    background: #e7f3ea;
+    color: var(--ok);
+  }
+</style>

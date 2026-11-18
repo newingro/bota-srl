@@ -1,0 +1,106 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import '../styles/admin.css';
+import Icon from '../components/Icon.astro';
+import Logo from '../components/Logo.astro';
+import { ahref, flashMessages } from '../lib/admin';
+import { get } from '../lib/db';
+
+interface Props {
+  title: string;
+  /** Voce di menu attiva */
+  section?: string;
+  bare?: boolean;
+}
+const { title, section = '', bare = false } = Astro.props;
+const user = Astro.locals.user;
+const flash = Astro.url.searchParams.get('ok');
+const err = Astro.url.searchParams.get('err');
+
+let newLeads = 0;
+if (user) {
+  const r = await get<{ n: number }>("SELECT COUNT(*) AS n FROM leads WHERE status = 'nuova'");
+  newLeads = Number(r?.n ?? 0);
+}
+
+const menu = [
+  { id: 'dashboard', href: ahref(Astro, '/'), label: 'Dashboard', icon: 'dashboard' },
+  { id: 'richieste', href: ahref(Astro, '/richieste'), label: 'Richieste preventivo', icon: 'inbox', badge: newLeads },
+  { id: 'lavori', href: ahref(Astro, '/lavori'), label: 'Lavori e casi studio', icon: 'image' },
+  { id: 'newsletter', href: ahref(Astro, '/newsletter'), label: 'Iscritti newsletter', icon: 'users' },
+  { id: 'campagne', href: ahref(Astro, '/campagne'), label: 'Campagne e coupon', icon: 'megaphone' },
+  { id: 'consensi', href: ahref(Astro, '/consensi'), label: 'Registro consensi', icon: 'shield' },
+  { id: 'account', href: ahref(Astro, '/account'), label: 'Account', icon: 'settings' },
+];
+const siteUrl = process.env.SITE_URL || '/';
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} · Gestionale Bota</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Font cssVariable="--font-archivo" preload />
+  </head>
+  <body class="admin">
+    {
+      bare ? (
+        <slot />
+      ) : (
+        <div class="adm">
+          <aside class="adm__side">
+            <a class="adm__brand" href={ahref(Astro, '/')}>
+              <Logo variant="light" />
+              <span>Gestionale</span>
+            </a>
+            <nav aria-label="Menu gestionale">
+              <ul class="adm__menu">
+                {menu.map((m) => (
+                  <li>
+                    <a href={m.href} aria-current={section === m.id ? 'page' : undefined}>
+                      <Icon name={m.icon} size={20} />
+                      <span>{m.label}</span>
+                      {m.badge ? <span class="adm__badge" aria-label={`${m.badge} nuove`}>{m.badge}</span> : null}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <div class="adm__side-foot">
+              <a href={siteUrl} target="_blank" rel="noopener"><Icon name="external" size={18} /> Vai al sito</a>
+              <form method="post" action={ahref(Astro, '/logout')}>
+                <button type="submit"><Icon name="logout" size={18} /> Esci</button>
+              </form>
+            </div>
+          </aside>
+          <div class="adm__main">
+            <header class="adm__top">
+              <button class="adm__menu-btn" type="button" aria-label="Apri menu" data-adm-menu><Icon name="menu" /></button>
+              <h1 class="adm__title">{title}</h1>
+              <div class="adm__top-actions"><slot name="actions" /></div>
+              {user && <span class="adm__user"><Icon name="user" size={18} /> {user.name || user.email}</span>}
+            </header>
+            {flash && flashMessages[flash] && <p class="adm-flash adm-flash--ok" role="status">{flashMessages[flash]}</p>}
+            {err && <p class="adm-flash adm-flash--err" role="alert">{err}</p>}
+            <main class="adm__content">
+              <slot />
+            </main>
+          </div>
+        </div>
+      )
+    }
+    <script>
+      const btn = document.querySelector('[data-adm-menu]');
+      btn?.addEventListener('click', () => document.body.classList.toggle('adm-menu-open'));
+      document.querySelectorAll<HTMLFormElement>('form[data-confirm]').forEach((f) =>
+        f.addEventListener('submit', (e) => {
+          if (!confirm(f.dataset.confirm || 'Confermi?')) e.preventDefault();
+        }),
+      );
+    </script>
+  </body>
+</html>

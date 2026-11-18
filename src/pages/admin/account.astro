@@ -1,0 +1,87 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import { all, get, run } from '../../lib/db';
+import { ahref, readForm, fstr } from '../../lib/admin';
+import { hashPassword, verifyPassword } from '../../lib/security';
+import { formatDate } from '../../lib/format';
+import { EMAIL_RE } from '../../lib/newsletter';
+
+export const prerender = false;
+const me = Astro.locals.user!;
+let error = '';
+const form = await readForm(Astro);
+if (form) {
+  const action = fstr(form, 'action');
+  if (action === 'password') {
+    const row = await get<{ password_hash: string }>('SELECT password_hash FROM admin_users WHERE id = ?', [me.id]);
+    const next = String(form.get('new') ?? '');
+    if (!row || !(await verifyPassword(String(form.get('current') ?? ''), String(row.password_hash)))) error = 'La password attuale non è corretta.';
+    else if (next.length < 10) error = 'La nuova password deve avere almeno 10 caratteri.';
+    else if (next !== String(form.get('confirm') ?? '')) error = 'Le due password non coincidono.';
+    else {
+      await run('UPDATE admin_users SET password_hash = ? WHERE id = ?', [await hashPassword(next), me.id]);
+      await run('DELETE FROM sessions WHERE user_id = ?', [me.id]);
+      return Astro.redirect(ahref(Astro, '/login?ok=password'), 303);
+    }
+  } else if (action === 'user') {
+    const email = fstr(form, 'email', 200).toLowerCase();
+    const pw = String(form.get('password') ?? '');
+    if (!EMAIL_RE.test(email)) error = 'Email non valida.';
+    else if (pw.length < 10) error = 'La password deve avere almeno 10 caratteri.';
+    else if (await get('SELECT id FROM admin_users WHERE email = ?', [email])) error = 'Esiste già un utente con questa email.';
+    else {
+      await run('INSERT INTO admin_users(email, name, password_hash) VALUES (?, ?, ?)', [email, fstr(form, 'name', 100) || null, await hashPassword(pw)]);
+      return Astro.redirect(ahref(Astro, '/account?ok=user'), 303);
+    }
+  } else if (action === 'delete_user') {
+    const id = Number(form.get('id'));
+    if (id !== me.id) await run('DELETE FROM admin_users WHERE id = ?', [id]);
+    return Astro.redirect(ahref(Astro, '/account?ok=deleted'), 303);
+  }
+}
+const users = await all('SELECT id, email, name, created_at, last_login_at FROM admin_users ORDER BY id');
+---
+
+<Admin title="Account e utenti" section="account">
+  {error && <p class="alert alert--error">{error}</p>}
+  <div class="layout-2">
+    <div>
+      <section class="panel">
+        <h2>Utenti del gestionale</h2>
+        <div class="table-wrap" style="margin-top:1rem">
+          <table class="table">
+            <thead><tr><th>Email</th><th>Nome</th><th>Ultimo accesso</th><th></th></tr></thead>
+            <tbody>
+              {users.map((u) => (
+                <tr>
+                  <td>{u.email}</td><td>{u.name || '–'}</td><td>{formatDate(u.last_login_at as string, true)}</td>
+                  <td>{Number(u.id) !== me.id && (
+                    <form method="post" data-confirm={`Rimuovere l'accesso a ${u.email}?`}><input type="hidden" name="id" value={u.id} /><button class="btn btn--sm btn--danger" name="action" value="delete_user">Rimuovi</button></form>
+                  )}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <form method="post" class="panel form-grid">
+        <h2>Aggiungi utente</h2>
+        <div class="form-grid form-grid--2">
+          <div class="field"><label for="u-name">Nome</label><input class="input" id="u-name" name="name" /></div>
+          <div class="field"><label for="u-email">Email</label><input class="input" id="u-email" name="email" type="email" required /></div>
+          <div class="field"><label for="u-pw">Password (min. 10 caratteri)</label><input class="input" id="u-pw" name="password" type="password" minlength="10" required autocomplete="new-password" /></div>
+        </div>
+        <div><button class="btn" name="action" value="user" type="submit">Crea utente</button></div>
+      </form>
+    </div>
+    <aside>
+      <form method="post" class="panel form-grid">
+        <h2>Cambia la tua password</h2>
+        <div class="field"><label for="cur">Password attuale</label><input class="input" id="cur" name="current" type="password" required autocomplete="current-password" /></div>
+        <div class="field"><label for="new">Nuova password</label><input class="input" id="new" name="new" type="password" minlength="10" required autocomplete="new-password" /></div>
+        <div class="field"><label for="conf">Ripeti nuova password</label><input class="input" id="conf" name="confirm" type="password" minlength="10" required autocomplete="new-password" /></div>
+        <button class="btn btn--block" name="action" value="password" type="submit">Aggiorna password</button>
+      </form>
+    </aside>
+  </div>
+</Admin>

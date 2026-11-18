@@ -1,0 +1,146 @@
+---
+import { Font } from 'astro:assets';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CookieBanner from '../components/CookieBanner.astro';
+import MobileCtaBar from '../components/MobileCtaBar.astro';
+import { company, legal } from '../config/site';
+
+export interface Props {
+  title: string;
+  description: string;
+  /** Percorso canonico (es. "/servizi/"). Default: percorso corrente */
+  path?: string;
+  noindex?: boolean;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  jsonLd?: Record<string, unknown>[];
+  breadcrumbs?: { name: string; path: string }[];
+  /** Nasconde la barra CTA mobile (es. nella pagina del modulo) */
+  hideMobileCta?: boolean;
+  /** Pagina di conversione (grazie): attiva gli eventi di conversione se c'è consenso */
+  conversion?: boolean;
+}
+
+const {
+  title,
+  description,
+  path = Astro.url.pathname,
+  noindex = false,
+  ogImage = '/og-image.png',
+  ogType = 'website',
+  jsonLd = [],
+  breadcrumbs,
+  hideMobileCta = false,
+  conversion = false,
+} = Astro.props;
+
+const site = Astro.site ?? new URL('https://bota.srl');
+const canonical = new URL(path, site).href;
+const fullTitle = title.includes('Bota') ? title : `${title} | Bota s.r.l. – Impresa edile Firenze`;
+const ogImageUrl = new URL(ogImage, site).href;
+
+const graph: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'GeneralContractor',
+    '@id': `${site.origin}/#impresa`,
+    name: company.name,
+    legalName: company.legalName,
+    url: `${site.origin}/`,
+    logo: `${site.origin}/logo.png`,
+    image: ogImageUrl,
+    description:
+      'Impresa edile a Campi Bisenzio (FI) specializzata in ristrutturazioni chiavi in mano ed efficientamento energetico a Firenze e provincia.',
+    email: company.email,
+    telephone: company.phone.e164,
+    vatID: `IT${company.vat}`,
+    taxID: company.vat,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: company.address.street,
+      postalCode: company.address.postalCode,
+      addressLocality: company.address.city,
+      addressRegion: company.address.province,
+      addressCountry: company.address.country,
+    },
+    areaServed: [
+      { '@type': 'AdministrativeArea', name: 'Città metropolitana di Firenze' },
+    ],
+    openingHoursSpecification: company.hours
+      .filter((h) => h.schema)
+      .map((h) => ({ '@type': 'OpeningHoursSpecification', ...h.schema })),
+    contactPoint: [
+      { '@type': 'ContactPoint', telephone: company.phone.e164, contactType: 'customer service', availableLanguage: 'Italian' },
+      { '@type': 'ContactPoint', telephone: company.mobile.e164, contactType: 'sales', availableLanguage: 'Italian' },
+    ],
+    sameAs: Object.values(company.social).filter(Boolean),
+    hasMap: company.mapsUrl,
+  },
+  ...jsonLd,
+];
+if (breadcrumbs?.length) {
+  graph.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: breadcrumbs.map((b, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: b.name,
+      item: new URL(b.path, site).href,
+    })),
+  });
+}
+const ldJson = JSON.stringify(graph.length === 1 ? graph[0] : graph).replace(/</g, '\\u003c');
+
+const analytics = {
+  ga: import.meta.env.PUBLIC_GA_ID || '',
+  ads: import.meta.env.PUBLIC_GADS_ID || '',
+  pixel: import.meta.env.PUBLIC_META_PIXEL_ID || '',
+  adsLabel: import.meta.env.PUBLIC_GADS_CONVERSION_LABEL || '',
+};
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <meta name="theme-color" content="#1b2126" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <Font cssVariable="--font-archivo" preload />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:site_name" content="Bota s.r.l." />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script type="application/ld+json" set:html={ldJson} />
+    <slot name="head" />
+  </head>
+  <body data-ga={analytics.ga} data-ads={analytics.ads} data-pixel={analytics.pixel} data-ads-label={analytics.adsLabel} data-consent-version={legal.cookieVersion} data-conversion={conversion ? 'lead' : undefined}>
+    <a class="skip-link" href="#contenuto">Vai al contenuto</a>
+    <Header />
+    <main id="contenuto" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+    {!hideMobileCta && <MobileCtaBar />}
+    <CookieBanner />
+  </body>
+</html>

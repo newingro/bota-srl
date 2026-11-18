@@ -1,0 +1,7 @@
+---
+import { destroySession } from '../../lib/auth';
+import { ahref } from '../../lib/admin';
+export const prerender = false;
+if (Astro.request.method === 'POST') await destroySession(Astro.cookies);
+return Astro.redirect(ahref(Astro, '/login'), 303);
+---

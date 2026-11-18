@@ -1,0 +1,1 @@
+export { storageMode } from './storage';

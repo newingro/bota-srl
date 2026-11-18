@@ -1,0 +1,117 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import { get, run } from '../../../lib/db';
+import { ahref, leadStatuses, statusLabel, readForm, fstr } from '../../../lib/admin';
+import { formatDate } from '../../../lib/format';
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+const form = await readForm(Astro);
+if (form) {
+  const action = fstr(form, 'action');
+  if (action === 'delete') {
+    await run('DELETE FROM leads WHERE id = ?', [id]);
+    return Astro.redirect(ahref(Astro, '/richieste?ok=deleted'), 303);
+  }
+  const status = fstr(form, 'status');
+  if (leadStatuses.some((s) => s.value === status)) {
+    await run("UPDATE leads SET status = ?, notes = ?, updated_at = datetime('now') WHERE id = ?", [status, fstr(form, 'notes', 10000), id]);
+  }
+  return Astro.redirect(ahref(Astro, `/richieste/${id}?ok=saved`), 303);
+}
+
+const l = await get('SELECT * FROM leads WHERE id = ?', [id]);
+if (!l) return Astro.redirect(ahref(Astro, '/richieste'));
+const s = statusLabel(String(l.status));
+const tel = 'tel:' + String(l.phone).replace(/[^\d+]/g, '');
+const wa = 'https://wa.me/' + String(l.phone).replace(/\D/g, '').replace(/^(?!39)(3\d{8,9})$/, '39$1');
+const subj = encodeURIComponent(`Preventivo ${l.service ?? ''} – Bota s.r.l.`);
+---
+
+<Admin title={`Richiesta di ${l.name}`} section="richieste">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/richieste')}>← Tutte le richieste</a>
+  <div class="layout-2">
+    <div>
+      <section class="panel">
+        <div class="panel__head">
+          <h2>{l.service}</h2>
+          <span class={`pill pill--${s.tone}`}>{s.label}</span>
+        </div>
+        <dl class="dl">
+          <dt>Ricevuta</dt><dd>{formatDate(String(l.created_at), true)}</dd>
+          <dt>Nome</dt><dd>{l.name}</dd>
+          <dt>Telefono</dt><dd><a href={tel}>{l.phone}</a></dd>
+          <dt>Email</dt><dd><a href={`mailto:${l.email}`}>{l.email}</a></dd>
+          <dt>Comune</dt><dd>{l.comune || '–'}</dd>
+          <dt>Tempistiche</dt><dd>{l.timing || '–'}</dd>
+          <dt>Newsletter</dt><dd>{Number(l.newsletter_optin) ? 'Sì, ha chiesto di iscriversi (double opt-in)' : 'No'}</dd>
+        </dl>
+        <h3 class="msg-h">Messaggio</h3>
+        <p class="msg">{l.message || 'Nessun messaggio.'}</p>
+      </section>
+
+      <section class="panel">
+        <h2>Gestione</h2>
+        <form method="post" class="form-grid">
+          <div class="field">
+            <label for="status">Stato</label>
+            <select class="select" id="status" name="status">
+              {leadStatuses.map((o) => <option value={o.value} selected={o.value === l.status}>{o.label}</option>)}
+            </select>
+          </div>
+          <div class="field">
+            <label for="notes">Note interne</label>
+            <textarea class="textarea" id="notes" name="notes" placeholder="Es. chiamato il 20/11, sopralluogo fissato per…">{l.notes || ''}</textarea>
+          </div>
+          <div><button class="btn" type="submit" name="action" value="save">Salva</button></div>
+        </form>
+      </section>
+    </div>
+    <aside>
+      <section class="panel">
+        <h2>Azioni rapide</h2>
+        <div class="form-grid quick">
+          <a class="btn btn--block" href={tel}><Icon name="phone" /> Chiama {l.phone}</a>
+          <a class="btn btn--wa btn--block" href={wa} target="_blank" rel="noopener"><Icon name="whatsapp" /> WhatsApp</a>
+          <a class="btn btn--ghost btn--block" href={`mailto:${l.email}?subject=${subj}`}><Icon name="mail" /> Invia preventivo via email</a>
+        </div>
+      </section>
+      <section class="panel">
+        <h2>Tracciamento</h2>
+        <dl class="dl small">
+          <dt>Pagina</dt><dd>{l.source_page || '–'}</dd>
+          <dt>Sorgente</dt><dd>{[l.utm_source, l.utm_medium, l.utm_campaign].filter(Boolean).join(' / ') || (l.gclid ? 'Google Ads' : 'Diretto / organico')}</dd>
+          <dt>Email a info@</dt><dd>{l.notify_status || '–'}</dd>
+          <dt>Risposta auto</dt><dd>{l.autoreply_status || '–'}</dd>
+          <dt>Privacy</dt><dd>{Number(l.privacy_ack) ? 'Informativa letta' : '–'}</dd>
+        </dl>
+      </section>
+      <form method="post" data-confirm="Eliminare definitivamente questa richiesta? (es. per richiesta di cancellazione GDPR)">
+        <button class="btn btn--danger btn--sm" type="submit" name="action" value="delete"><Icon name="trash" size={16} /> Elimina richiesta</button>
+      </form>
+    </aside>
+  </div>
+</Admin>
+
+<style>
+  .msg-h {
+    font-size: 1rem;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .msg {
+    white-space: pre-wrap;
+    background: #faf8f5;
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0;
+  }
+  .quick {
+    margin-top: 1rem;
+  }
+  .small {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+  }
+</style>

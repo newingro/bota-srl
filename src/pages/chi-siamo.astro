@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import Photo from '../components/Photo.astro';
+import Icon from '../components/Icon.astro';
+import CtaBand from '../components/CtaBand.astro';
+import { images } from '../assets/img';
+import { company } from '../config/site';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Chi siamo', path: '/chi-siamo/' },
+];
+const pillars = [
+  {
+    icon: 'compass',
+    title: 'Mission',
+    text: 'La nostra mission è quella di fornire servizi di alta qualità ai nostri clienti, garantendo la massima soddisfazione e il rispetto delle tempistiche e dei budget stabiliti.',
+  },
+  {
+    icon: 'handshake',
+    title: 'Valori',
+    text: 'I nostri valori sono il rispetto, la trasparenza e la professionalità. Ci impegniamo a lavorare in modo etico e responsabile, rispettando le leggi e le norme del settore.',
+  },
+  {
+    icon: 'medal',
+    title: 'Esperienza',
+    text: 'Abbiamo lavorato su numerosi progetti nel corso degli anni, sia per privati che per aziende. Siamo in grado di gestire progetti di qualsiasi dimensione e complessità.',
+  },
+];
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'AboutPage',
+    name: 'Chi siamo – Bota s.r.l.',
+    about: { '@id': 'https://bota.srl/#impresa' },
+  },
+];
+---
+
+<Base
+  title="Chi siamo: impresa edile a Campi Bisenzio"
+  description="Bota s.r.l. è un'impresa edile di Campi Bisenzio (FI) specializzata in costruzioni e restauri da oltre 10 anni. Team qualificato, rispetto di tempi e budget."
+  breadcrumbs={crumbs}
+  jsonLd={ld}
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Chi siamo"
+    title="Bota s.r.l., la tua impresa edile di fiducia"
+    lead={`Siamo un’impresa edile con sede a Campi Bisenzio, in provincia di Firenze, specializzata in costruzioni e restauri da oltre ${company.yearsOfExperience} anni.`}
+  />
+
+  <section class="section">
+    <div class="container about">
+      <div>
+        <p class="lead">
+          Siamo composti da un <strong>team altamente qualificato e professionale</strong>, con anni di esperienza nel settore.
+        </p>
+        <p>
+          Ci occupiamo di ristrutturazioni chiavi in mano ed efficientamento energetico, ma anche di rifacimento bagni e tetti,
+          cartongessi, tinteggiature, restauro di facciate e linee vita. Coordiniamo tutte le fasi del cantiere e collaboriamo con i
+          migliori professionisti del settore per impianti elettrici, termici e idraulici, fotovoltaico e posa di parquet.
+        </p>
+        <ul class="checklist">
+          <li>Sede a Campi Bisenzio, operativi in tutta la provincia di Firenze e nelle zone limitrofe</li>
+          <li>Lavori per privati, condomini e aziende</li>
+          <li>Preventivi chiari e rispetto dei tempi concordati</li>
+        </ul>
+        <div class="btn-row">
+          <a href="/contatti/#preventivo" class="btn">Richiedi un preventivo <Icon name="arrow" /></a>
+          <a href="/lavori/" class="btn btn--ghost">Guarda i lavori</a>
+        </div>
+      </div>
+      <div class="media about__media">
+        <Photo src={images.about} alt="Pianta di un appartamento con casco da cantiere e metro" priority sizes="(min-width: 1024px) 45vw, 100vw" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--stone" aria-label="Mission, valori ed esperienza">
+    <div class="container grid grid--3">
+      {
+        pillars.map((p) => (
+          <article class="card">
+            <span class="card__icon"><Icon name={p.icon} /></span>
+            <h2 class="pillar__title">{p.title}</h2>
+            <p>{p.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container numbers">
+      <div class="num"><strong>{company.yearsOfExperience}+</strong><span>anni di esperienza</span></div>
+      <div class="num"><strong>8</strong><span>tipologie di intervento</span></div>
+      <div class="num"><strong>1</strong><span>unico referente per il tuo cantiere</span></div>
+      <div class="num"><strong>FI</strong><span>Firenze, provincia e zone limitrofe</span></div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    gap: 2.5rem;
+  }
+  @media (min-width: 1024px) {
+    .about {
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 4rem;
+      align-items: center;
+    }
+  }
+  .about__media {
+    aspect-ratio: 4 / 3;
+  }
+  .about .checklist {
+    margin: 1.5rem 0 2rem;
+  }
+  .pillar__title {
+    font-size: 1.35rem;
+  }
+  .numbers {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (min-width: 900px) {
+    .numbers {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+  .num {
+    padding: 1.5rem;
+    border-left: 3px solid var(--brand);
+  }
+  .num strong {
+    display: block;
+    font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+  }
+  .num span {
+    color: var(--ink-2);
+  }
+</style>

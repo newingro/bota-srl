@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d6e3e8"/><stop offset="1" stop-color="#f1efe9"/></linearGradient>
+    <pattern id="coppi" width="40" height="30" patternUnits="userSpaceOnUse"><rect width="40" height="30" fill="#b4441a"/><path d="M0 28h40" stroke="#7c2e10" stroke-width="3"/><path d="M20 0v28" stroke="#8f3412" stroke-width="2"/><ellipse cx="10" cy="14" rx="7" ry="12" fill="#c2522a"/><ellipse cx="30" cy="14" rx="7" ry="12" fill="#c2522a"/></pattern>
+    <pattern id="ins" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#f2d48f"/><path d="M0 12c4-8 8-8 12 0s8 8 12 0" fill="none" stroke="#d9a94a" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <g fill="#fff" opacity=".8"><ellipse cx="220" cy="150" rx="110" ry="30"/><ellipse cx="300" cy="130" rx="80" ry="34"/><ellipse cx="900" cy="110" rx="90" ry="24"/></g>
+  <path d="M0 640c200-60 400-70 600-40s420 20 600-30V900H0Z" fill="#c9d3bf"/>
+  <!-- falda -->
+  <polygon points="80,820 600,330 1120,820" fill="#7a5a3c"/>
+  <!-- travetti a vista (porzione in lavorazione a destra) -->
+  <polygon points="600,330 1120,820 860,820 600,575" fill="#8b6a4a"/>
+  <g stroke="#5e432b" stroke-width="16"><path d="M640 368 900 820M690 415l210 405M740 462l230 358M790 509l250 311M840 556 1080 820"/></g>
+  <!-- isolamento -->
+  <polygon points="600,350 860,595 860,640 600,395 340,640 340,595" fill="url(#ins)"/>
+  <!-- manto di coppi lato sinistro -->
+  <polygon points="80,820 600,330 600,395 600,575 340,820" fill="url(#coppi)"/>
+  <polygon points="600,330 860,575 860,600 600,355" fill="#7c2e10"/>
+  <!-- colmo -->
+  <path d="M60 838 600 318l540 520" fill="none" stroke="#7c2e10" stroke-width="18" stroke-linejoin="round"/>
+  <!-- linea vita -->
+  <g>
+    <rect x="590" y="258" width="20" height="72" fill="#59626a"/><circle cx="600" cy="252" r="14" fill="#f2b33d" stroke="#59626a" stroke-width="5"/>
+    <rect x="300" y="520" width="20" height="72" fill="#59626a" transform="rotate(0)"/><circle cx="310" cy="514" r="14" fill="#f2b33d" stroke="#59626a" stroke-width="5"/>
+    <path d="M310 514 600 252" stroke="#f2b33d" stroke-width="6"/>
+    <rect x="880" y="520" width="20" height="72" fill="#59626a"/><circle cx="890" cy="514" r="14" fill="#f2b33d" stroke="#59626a" stroke-width="5"/>
+    <path d="M600 252 890 514" stroke="#f2b33d" stroke-width="6" stroke-dasharray="18 10"/>
+  </g>
+  <!-- ponteggio -->
+  <g stroke="#59626a" stroke-width="8"><path d="M960 620v280M1080 620v280M1170 620v280"/></g>
+  <g fill="#c08a4e"><rect x="940" y="700" width="260" height="14"/><rect x="940" y="840" width="260" height="14"/></g>
+  <g stroke="#59626a" stroke-width="3"><path d="M960 714l120 126M1080 714l90 126"/></g>
+  <rect x="0" y="860" width="1200" height="40" fill="#ddd5ca"/>
+</svg>

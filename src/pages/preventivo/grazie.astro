@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { company } from '../../config/site';
+---
+
+<Base title="Richiesta inviata – grazie!" description="Abbiamo ricevuto la tua richiesta di preventivo." noindex conversion>
+  <section class="section thanks">
+    <div class="container container--narrow">
+      <span class="thanks__icon"><Icon name="check" size={44} /></span>
+      <h1>Grazie, abbiamo ricevuto la tua richiesta!</h1>
+      <p class="lead">
+        Ti abbiamo appena inviato un’email di conferma. <strong>Un nostro operatore ti chiamerà al più presto</strong> per approfondire le
+        tue esigenze e fornirti i dettagli del preventivo, oppure te lo invieremo via email.
+      </p>
+      <div class="thanks__box">
+        <p><strong>Non trovi l’email?</strong> Controlla la cartella spam o promozioni. Se hai urgenza, chiamaci negli orari d’ufficio:</p>
+        <div class="btn-row">
+          <a class="btn" href={company.phone.href}><Icon name="phone" /> {company.phone.display}</a>
+          <a class="btn btn--wa" href={company.whatsapp.href} target="_blank" rel="noopener"><Icon name="whatsapp" /> WhatsApp</a>
+        </div>
+      </div>
+      <p class="thanks__more">Nel frattempo puoi dare un’occhiata ai <a href="/lavori/">lavori realizzati</a> o tornare alla <a href="/">home page</a>.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .thanks {
+    text-align: center;
+  }
+  .thanks__icon {
+    display: inline-grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    margin-bottom: 1.5rem;
+    border-radius: 50%;
+    background: #e7f3ea;
+    color: var(--ok);
+  }
+  .thanks h1 {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+  }
+  .thanks__box {
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background: var(--stone);
+    border-radius: var(--radius);
+  }
+  .thanks__box .btn-row {
+    justify-content: center;
+  }
+</style>

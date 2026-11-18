@@ -1,0 +1,133 @@
+---
+import { legal } from '../config/site';
+interface Props { source?: string; dark?: boolean; idPrefix?: string }
+const { source = 'footer', dark = true, idPrefix = 'nl' } = Astro.props;
+---
+
+<form class:list={['nl-form', { 'nl-form--dark': dark }]} method="post" action="/api/newsletter" data-nl-form novalidate>
+  <div class="nl-form__row">
+    <label class="sr-only" for={`${idPrefix}-email`}>Il tuo indirizzo email</label>
+    <input
+      id={`${idPrefix}-email`}
+      class="input"
+      type="email"
+      name="email"
+      placeholder="La tua email"
+      autocomplete="email"
+      inputmode="email"
+      required
+    />
+    <button class="btn" type="submit">Iscriviti</button>
+  </div>
+  <label class="check">
+    <input type="checkbox" name="consent" value="yes" required />
+    <span>
+      {legal.newsletterConsentText} Leggi l’<a href="/privacy-policy/#newsletter">informativa privacy</a>.
+    </span>
+  </label>
+  <div class="hp" aria-hidden="true">
+    <label>Lascia vuoto <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+  </div>
+  <input type="hidden" name="source" value={source} />
+  <input type="hidden" name="ts" value="" data-ts />
+  <p class="nl-form__msg" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-nl-form]').forEach((form) => {
+    const ts = form.querySelector<HTMLInputElement>('[data-ts]');
+    if (ts) ts.value = String(Date.now());
+    const msg = form.querySelector<HTMLElement>('.nl-form__msg')!;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'nl-form__msg';
+      const email = form.elements.namedItem('email') as HTMLInputElement;
+      const consent = form.elements.namedItem('consent') as HTMLInputElement;
+      if (!email.checkValidity()) {
+        msg.textContent = 'Inserisci un indirizzo email valido.';
+        msg.classList.add('is-error');
+        email.setAttribute('aria-invalid', 'true');
+        email.focus();
+        return;
+      }
+      email.removeAttribute('aria-invalid');
+      if (!consent.checked) {
+        msg.textContent = 'Per iscriverti è necessario il consenso a ricevere le comunicazioni.';
+        msg.classList.add('is-error');
+        consent.focus();
+        return;
+      }
+      const btn = form.querySelector('button')!;
+      btn.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          headers: { Accept: 'application/json' },
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Si è verificato un errore. Riprova.');
+        msg.textContent = data.message || 'Controlla la tua casella email per confermare l’iscrizione.';
+        msg.classList.add('is-ok');
+        form.reset();
+      } catch (err) {
+        msg.textContent = (err as Error).message;
+        msg.classList.add('is-error');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+</script>
+
+<style>
+  .nl-form {
+    display: grid;
+    gap: 0.9rem;
+  }
+  .nl-form__row {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .nl-form__row .input {
+    flex: 1;
+    min-width: 0;
+  }
+  .nl-form .check {
+    font-size: 0.85rem;
+  }
+  .nl-form--dark .check {
+    color: var(--on-dark-muted);
+  }
+  .nl-form--dark .check a {
+    color: var(--accent-on-dark);
+  }
+  .nl-form__msg {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .nl-form__msg:empty {
+    display: none;
+  }
+  .nl-form__msg.is-ok {
+    color: #9fd8ae;
+  }
+  .nl-form:not(.nl-form--dark) .nl-form__msg.is-ok {
+    color: var(--ok);
+  }
+  .nl-form__msg.is-error {
+    color: #ffb4a8;
+  }
+  .nl-form:not(.nl-form--dark) .nl-form__msg.is-error {
+    color: var(--error);
+  }
+  .nl-form--dark .input {
+    border-color: #4a555e;
+    background: var(--dark-2);
+    color: var(--white);
+  }
+  .nl-form--dark .input::placeholder {
+    color: #aab3bb;
+  }
+</style>

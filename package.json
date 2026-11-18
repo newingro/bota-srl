@@ -1,0 +1,37 @@
+{
+  "name": "bota-srl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "node scripts/serve-local.mjs",
+    "start": "node ./dist/server/entry.mjs",
+    "assets": "node scripts/generate-assets.mjs",
+    "admin:create": "tsx scripts/create-admin.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "reset:demo": "tsx scripts/seed-demo.ts --reset"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@astrojs/node": "^11.1.13",
+    "@astrojs/sitemap": "^3.7.5",
+    "@astrojs/vercel": "^11.0.22",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@libsql/client": "^0.18.0",
+    "@vercel/blob": "^2.9.0",
+    "astro": "^7.4.12",
+    "nodemailer": "^10.6.0",
+    "sharp": "^0.35.5"
+  },
+  "type": "module",
+  "devDependencies": {
+    "compression": "^1.8.2",
+    "tsx": "^4.23.15"
+  }
+}

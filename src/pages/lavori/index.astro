@@ -1,0 +1,110 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import WorkCard from '../../components/WorkCard.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import Icon from '../../components/Icon.astro';
+import { publishedWorks, workServices } from '../../lib/works';
+import { cacheHeaders } from '../../lib/cache';
+
+export const prerender = false;
+cacheHeaders(Astro);
+
+const filter = Astro.url.searchParams.get('servizio') || '';
+const active = workServices.includes(filter) ? filter : '';
+const all = await publishedWorks().catch(() => []);
+const works = active ? all.filter((w) => w.service === active) : all;
+const available = workServices.filter((s) => all.some((w) => w.service === s));
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Lavori', path: '/lavori/' },
+];
+---
+
+<Base
+  title="Lavori realizzati e casi studio"
+  description="Lavori realizzati e casi studio di Bota s.r.l.: ristrutturazioni, efficientamento energetico, tetti e facciate a Firenze e provincia. Prima e dopo dei nostri cantieri."
+  path="/lavori/"
+  noindex={!!active}
+  breadcrumbs={crumbs}
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Lavori realizzati"
+    title="I nostri lavori e casi studio"
+    lead="Una selezione dei cantieri che abbiamo realizzato a Firenze e provincia: il punto di partenza, l’intervento e il risultato finale."
+  />
+
+  <section class="section">
+    <div class="container">
+      {
+        available.length > 1 && (
+          <nav class="filters" aria-label="Filtra per tipo di intervento">
+            <a href="/lavori/" class="chip" aria-current={!active ? 'page' : undefined}>Tutti</a>
+            {available.map((s) => (
+              <a href={`/lavori/?servizio=${encodeURIComponent(s)}`} class="chip" aria-current={active === s ? 'page' : undefined}>{s}</a>
+            ))}
+          </nav>
+        )
+      }
+      {
+        works.length ? (
+          <div class="grid grid--3">{works.map((w, i) => <WorkCard work={w} headingLevel="h2" priority={i === 0} />)}</div>
+        ) : (
+          <div class="empty">
+            <Icon name="image" size={44} />
+            <h2>Stiamo aggiornando la galleria dei lavori</h2>
+            <p class="muted">A breve pubblicheremo qui i nostri casi studio. Nel frattempo, raccontaci il tuo progetto.</p>
+            <a class="btn" href="/contatti/#preventivo">Richiedi un preventivo</a>
+          </div>
+        )
+      }
+    </div>
+  </section>
+  <CtaBand title="Vuoi un risultato come questi?" />
+</Base>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1.5px solid var(--line);
+    border-radius: 999px;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+  }
+  .chip:hover {
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+  .chip[aria-current='page'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--white);
+  }
+  .empty {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 0.5rem;
+    padding: 3rem 1rem;
+    border: 2px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+  }
+  .empty h2 {
+    color: var(--ink);
+    font-size: 1.5rem;
+    margin: 0.5rem 0 0;
+  }
+</style>

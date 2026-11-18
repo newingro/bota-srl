@@ -1,0 +1,145 @@
+---
+import Admin from '../../layouts/Admin.astro';
+import Icon from '../../components/Icon.astro';
+import { all, get } from '../../lib/db';
+import { ahref, statusLabel } from '../../lib/admin';
+import { formatDate } from '../../lib/format';
+import { mailMode } from '../../lib/email';
+import { storageMode } from '../../lib/images-mode';
+
+export const prerender = false;
+
+const n = async (sql: string) => Number((await get<{ n: number }>(sql))?.n ?? 0);
+const [leads30, leadsNew, leadsWon, subs, subsPending, worksPub, worksDraft] = await Promise.all([
+  n("SELECT COUNT(*) AS n FROM leads WHERE created_at >= datetime('now', '-30 days')"),
+  n("SELECT COUNT(*) AS n FROM leads WHERE status = 'nuova'"),
+  n("SELECT COUNT(*) AS n FROM leads WHERE status = 'acquisito'"),
+  n("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'confirmed'"),
+  n("SELECT COUNT(*) AS n FROM subscribers WHERE status = 'pending'"),
+  n("SELECT COUNT(*) AS n FROM works WHERE status = 'published'"),
+  n("SELECT COUNT(*) AS n FROM works WHERE status = 'draft'"),
+]);
+const latest = await all('SELECT id, created_at, name, phone, service, comune, status FROM leads ORDER BY created_at DESC LIMIT 6');
+const byService = await all<{ service: string; n: number }>(
+  "SELECT service, COUNT(*) AS n FROM leads WHERE created_at >= datetime('now', '-90 days') GROUP BY service ORDER BY n DESC LIMIT 6",
+);
+const maxS = Math.max(1, ...byService.map((s) => Number(s.n)));
+---
+
+<Admin title="Dashboard" section="dashboard">
+  <a slot="actions" class="btn btn--sm" href={ahref(Astro, '/lavori/nuovo')}><Icon name="plus" size={18} /> Nuovo lavoro</a>
+
+  <div class="kpis">
+    <a class="kpi" href={ahref(Astro, '/richieste?stato=nuova')}>
+      <span class="kpi__label"><Icon name="inbox" size={18} /> Da gestire</span>
+      <span class="kpi__value">{leadsNew}</span>
+      <span class="kpi__sub">richieste nuove</span>
+    </a>
+    <a class="kpi" href={ahref(Astro, '/richieste')}>
+      <span class="kpi__label"><Icon name="send" size={18} /> Ultimi 30 giorni</span>
+      <span class="kpi__value">{leads30}</span>
+      <span class="kpi__sub">richieste di preventivo · {leadsWon} clienti acquisiti</span>
+    </a>
+    <a class="kpi" href={ahref(Astro, '/newsletter')}>
+      <span class="kpi__label"><Icon name="users" size={18} /> Newsletter</span>
+      <span class="kpi__value">{subs}</span>
+      <span class="kpi__sub">iscritti confermati · {subsPending} in attesa</span>
+    </a>
+    <a class="kpi" href={ahref(Astro, '/lavori')}>
+      <span class="kpi__label"><Icon name="image" size={18} /> Lavori</span>
+      <span class="kpi__value">{worksPub}</span>
+      <span class="kpi__sub">pubblicati · {worksDraft} bozze</span>
+    </a>
+  </div>
+
+  <div class="layout-2">
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Ultime richieste</h2>
+        <a href={ahref(Astro, '/richieste')} class="link-arrow">Tutte <Icon name="arrow" /></a>
+      </div>
+      {
+        latest.length ? (
+          <div class="table-wrap">
+            <table class="table">
+              <thead><tr><th>Data</th><th>Cliente</th><th>Intervento</th><th>Stato</th></tr></thead>
+              <tbody>
+                {latest.map((l) => {
+                  const s = statusLabel(String(l.status));
+                  return (
+                    <tr>
+                      <td class="nowrap">{formatDate(String(l.created_at), true)}</td>
+                      <td><a href={ahref(Astro, `/richieste/${l.id}`)}>{l.name}</a><br /><span class="muted">{l.phone}{l.comune ? ` · ${l.comune}` : ''}</span></td>
+                      <td>{l.service}</td>
+                      <td><span class={`pill pill--${s.tone}`}>{s.label}</span></td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p class="empty-state">Nessuna richiesta ancora. Arriveranno qui dal modulo del sito.</p>
+        )
+      }
+    </section>
+    <aside>
+      <section class="panel">
+        <h2>Interventi richiesti (90 gg)</h2>
+        {byService.length ? (
+          <ul class="bars">
+            {byService.map((s) => (
+              <li><span>{s.service || '—'}</span><span class="bar"><span style={`width:${(Number(s.n) / maxS) * 100}%`} /></span><strong>{s.n}</strong></li>
+            ))}
+          </ul>
+        ) : <p class="muted">Ancora nessun dato.</p>}
+      </section>
+      <section class="panel">
+        <h2>Stato servizi</h2>
+        <dl class="dl sys">
+          <dt>Invio email</dt><dd>{mailMode() === 'outbox' ? 'Modalità prova (non inviate)' : mailMode() === 'smtp' ? 'SMTP attivo' : 'Resend attivo'}</dd>
+          <dt>Archivio foto</dt><dd>{storageMode() === 'blob' ? 'Vercel Blob' : 'Disco locale'}</dd>
+          <dt>Database</dt><dd>{process.env.DATABASE_URL?.startsWith('libsql') ? 'Turso (cloud)' : 'Locale (SQLite)'}</dd>
+        </dl>
+      </section>
+    </aside>
+  </div>
+</Admin>
+
+<style>
+  .bars {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.7rem;
+    font-size: 0.875rem;
+  }
+  .bars li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.25rem 0.75rem;
+  }
+  .bar {
+    grid-column: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--stone-2);
+    overflow: hidden;
+  }
+  .bar span {
+    display: block;
+    height: 100%;
+    background: var(--brand);
+    border-radius: 999px;
+  }
+  .bars strong {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    align-self: center;
+  }
+  .sys {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+  }
+</style>

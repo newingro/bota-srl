@@ -1,0 +1,32 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import WorkForm from '../../../components/admin/WorkForm.astro';
+import { ahref, readForm } from '../../../lib/admin';
+import { saveWork, workFields } from '../../../lib/works-admin';
+
+export const prerender = false;
+
+let error = '';
+let draft = {};
+const form = await readForm(Astro);
+if (form) {
+  try {
+    const id = await saveWork(form);
+    return Astro.redirect(ahref(Astro, `/lavori/${id}?ok=created#foto`), 303);
+  } catch (e) {
+    error = (e as Error).message;
+    draft = workFields(form);
+  }
+}
+---
+
+<Admin title="Nuovo lavoro" section="lavori">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/lavori')}>← Lavori</a>
+  {error && <p class="alert alert--error">{error}</p>}
+  <form method="post" class="panel">
+    <WorkForm work={draft} />
+    <input type="hidden" name="status" value="draft" />
+    <p class="help">Il lavoro viene salvato come bozza: nel passaggio successivo potrai caricare le foto e pubblicarlo.</p>
+    <button class="btn" type="submit">Crea e carica le foto →</button>
+  </form>
+</Admin>

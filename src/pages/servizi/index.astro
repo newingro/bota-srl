@@ -1,0 +1,157 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Photo from '../../components/Photo.astro';
+import Icon from '../../components/Icon.astro';
+import CtaBand from '../../components/CtaBand.astro';
+import { images } from '../../assets/img';
+import { mainServices, otherServices, whyUs, serviceHref } from '../../data/services';
+
+const crumbs = [
+  { name: 'Home', path: '/' },
+  { name: 'Servizi', path: '/servizi/' },
+];
+const ld = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Servizi edili Bota s.r.l.',
+    itemListElement: [...mainServices, ...otherServices].map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: { '@type': 'Service', name: s.title, description: s.excerpt, provider: { '@id': 'https://bota.srl/#impresa' }, areaServed: 'Firenze e provincia' },
+    })),
+  },
+];
+---
+
+<Base
+  title="Servizi edili a Firenze: ristrutturazioni, tetti, facciate"
+  description="Servizi dell'impresa edile Bota s.r.l.: ristrutturazioni chiavi in mano, efficientamento energetico, rifacimento bagni e tetti, cartongesso, tinteggiature, facciate e linee vita a Firenze."
+  breadcrumbs={crumbs}
+  jsonLd={ld}
+>
+  <PageHero
+    crumbs={crumbs}
+    eyebrow="Servizi"
+    title="Servizi edili per edifici residenziali e commerciali"
+    lead="Bota s.r.l. è un’impresa edile con sede a Campi Bisenzio, in provincia di Firenze, in grado di offrire ai suoi clienti una vasta gamma di servizi edili per la ristrutturazione di edifici residenziali e commerciali."
+  />
+
+  <section class="section">
+    <div class="container">
+      <p class="lead intro">
+        Siamo specializzati in <strong>ristrutturazioni chiavi in mano</strong> ed interventi di <strong>efficientamento energetico</strong>,
+        ma naturalmente ci occupiamo anche di interventi “tradizionali” quali rifacimento bagni, rifacimento tetti, cartongessi,
+        tinteggiature, e molto altro ancora. Operiamo in tutta la provincia di Firenze e nelle zone limitrofe, e ci affidiamo ad un team
+        di esperti professionisti in grado di soddisfare ogni esigenza.
+      </p>
+
+      {
+        mainServices.map((s, i) => (
+          <article class:list={['feature', { 'feature--rev': i % 2 === 1 }]} id={s.slug}>
+            <div class="feature__media media">
+              <Photo src={images[s.image as keyof typeof images]} alt="" sizes="(min-width: 1024px) 50vw, 100vw" />
+            </div>
+            <div class="feature__body">
+              <span class="card__icon"><Icon name={s.icon} /></span>
+              <h2>{s.title}</h2>
+              {s.body.map((p) => <p>{p}</p>)}
+              <div class="btn-row">
+                <a href={serviceHref(s)} class="btn">Scopri di più <span class="sr-only">su {s.title}</span><Icon name="arrow" /></a>
+                <a href="/contatti/#preventivo" class="btn btn--ghost">Preventivo gratuito</a>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section section--stone" aria-labelledby="altri-servizi">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Altri servizi</p>
+        <h2 id="altri-servizi">Interventi edili su misura</h2>
+      </div>
+      <div class="grid grid--2">
+        {
+          otherServices.map((s) => (
+            <article class="card svc" id={s.slug}>
+              <div class="svc__head">
+                <span class="card__icon"><Icon name={s.icon} /></span>
+                <h3>{s.title}</h3>
+              </div>
+              {s.body.map((p) => <p>{p}</p>)}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="perche">
+    <div class="container">
+      <div class="section-head section-head--center">
+        <p class="eyebrow">Perché scegliere Bota s.r.l.</p>
+        <h2 id="perche">Scegliendo il nostro team di professionisti edili a Firenze e provincia, otterrai:</h2>
+      </div>
+      <div class="grid grid--4">
+        {
+          whyUs.map((w) => (
+            <div class="card">
+              <span class="card__icon"><Icon name={w.icon} /></span>
+              <h3>{w.title}</h3>
+              <p class="muted">{w.text}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <CtaBand />
+</Base>
+
+<style>
+  .intro {
+    max-width: 70ch;
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+  .feature {
+    display: grid;
+    gap: 1.75rem;
+    align-items: center;
+    margin-bottom: clamp(3rem, 6vw, 5rem);
+  }
+  .feature:last-child {
+    margin-bottom: 0;
+  }
+  @media (min-width: 1024px) {
+    .feature {
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+    }
+    .feature--rev .feature__media {
+      order: 2;
+    }
+  }
+  .feature__media {
+    aspect-ratio: 4 / 3;
+  }
+  .svc__head {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .svc__head .card__icon {
+    margin: 0;
+  }
+  .svc__head h3 {
+    margin: 0;
+  }
+  .svc p {
+    color: var(--ink-2);
+  }
+</style>

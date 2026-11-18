@@ -1,0 +1,86 @@
+---
+import { workServices, clientTypes, type Work } from '../../lib/works';
+interface Props { work?: Partial<Work> }
+const { work = {} } = Astro.props;
+---
+
+<div class="form-grid form-grid--2">
+  <div class="field span-2">
+    <label for="title">Titolo del lavoro <span class="req">*</span></label>
+    <input class="input" id="title" name="title" required maxlength="140" value={work.title ?? ''} placeholder="Es. Ristrutturazione completa appartamento in centro" />
+  </div>
+  <div class="field">
+    <label for="service">Tipo di intervento</label>
+    <select class="select" id="service" name="service">
+      <option value="">—</option>
+      {workServices.map((s) => <option selected={s === work.service}>{s}</option>)}
+    </select>
+  </div>
+  <div class="field">
+    <label for="location">Località</label>
+    <input class="input" id="location" name="location" maxlength="100" value={work.location ?? ''} placeholder="Es. Firenze, Campo di Marte" />
+  </div>
+  <div class="field">
+    <label for="year">Anno</label>
+    <input class="input" id="year" name="year" maxlength="20" value={work.year ?? ''} placeholder="2025" inputmode="numeric" />
+  </div>
+  <div class="field">
+    <label for="duration">Durata lavori</label>
+    <input class="input" id="duration" name="duration" maxlength="60" value={work.duration ?? ''} placeholder="Es. 8 settimane" />
+  </div>
+  <div class="field">
+    <label for="client_type">Tipo di cliente</label>
+    <select class="select" id="client_type" name="client_type">
+      <option value="">—</option>
+      {clientTypes.map((s) => <option selected={s === work.client_type}>{s}</option>)}
+    </select>
+  </div>
+  <div class="field">
+    <label for="slug">Indirizzo pagina (slug)</label>
+    <input class="input" id="slug" name="slug" maxlength="80" value={work.slug ?? ''} placeholder="generato dal titolo" pattern="[a-z0-9\-]*" />
+    <p class="help">/lavori/<strong>{work.slug || 'titolo-del-lavoro'}</strong>/ — lascia vuoto per generarlo in automatico.</p>
+  </div>
+  <div class="field span-2">
+    <label for="summary">Riassunto (mostrato nelle anteprime)</label>
+    <textarea class="textarea" id="summary" name="summary" maxlength="600" rows="3">{work.summary ?? ''}</textarea>
+  </div>
+  <div class="field span-2">
+    <label for="challenge">La situazione di partenza</label>
+    <textarea class="textarea" id="challenge" name="challenge" rows="5">{work.challenge ?? ''}</textarea>
+  </div>
+  <div class="field span-2">
+    <label for="solution">L’intervento</label>
+    <textarea class="textarea" id="solution" name="solution" rows="6">{work.solution ?? ''}</textarea>
+  </div>
+  <div class="field span-2">
+    <label for="result">Il risultato</label>
+    <textarea class="textarea" id="result" name="result" rows="4">{work.result ?? ''}</textarea>
+    <p class="help">Formattazione: riga vuota = nuovo paragrafo · <code>- voce</code> = elenco · <code>**testo**</code> = grassetto.</p>
+  </div>
+  <details class="span-2 seo">
+    <summary>SEO (facoltativo)</summary>
+    <div class="form-grid">
+      <div class="field">
+        <label for="seo_title">Titolo per Google</label>
+        <input class="input" id="seo_title" name="seo_title" maxlength="70" value={work.seo_title ?? ''} />
+      </div>
+      <div class="field">
+        <label for="seo_description">Descrizione per Google</label>
+        <textarea class="textarea" id="seo_description" name="seo_description" maxlength="170" rows="2">{work.seo_description ?? ''}</textarea>
+      </div>
+    </div>
+  </details>
+</div>
+
+<style>
+  .seo summary {
+    cursor: pointer;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+  code {
+    background: var(--stone);
+    padding: 0 0.3em;
+    border-radius: 4px;
+  }
+</style>

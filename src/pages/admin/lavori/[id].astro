@@ -1,0 +1,204 @@
+---
+import Admin from '../../../layouts/Admin.astro';
+import Icon from '../../../components/Icon.astro';
+import WorkForm from '../../../components/admin/WorkForm.astro';
+import { all, get, run } from '../../../lib/db';
+import { ahref, readForm, fstr } from '../../../lib/admin';
+import { saveWork } from '../../../lib/works-admin';
+import { deleteVariants, parseVariants } from '../../../lib/images';
+import type { Work } from '../../../lib/works';
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+let error = '';
+const form = await readForm(Astro);
+if (form) {
+  const action = fstr(form, 'action');
+  try {
+    if (action === 'delete') {
+      const imgs = await all<{ variants: string }>('SELECT variants FROM images WHERE work_id = ?', [id]);
+      for (const i of imgs) await deleteVariants(i.variants);
+      await run('DELETE FROM images WHERE work_id = ?', [id]);
+      await run('DELETE FROM works WHERE id = ?', [id]);
+      return Astro.redirect(ahref(Astro, '/lavori?ok=deleted'), 303);
+    }
+    if (action === 'images') {
+      const imgs = await all<{ id: number }>('SELECT id FROM images WHERE work_id = ?', [id]);
+      for (const img of imgs) {
+        await run('UPDATE images SET alt = ?, phase = ?, sort = ? WHERE id = ?', [
+          fstr(form, `alt_${img.id}`, 200),
+          ['prima', 'durante', 'dopo'].includes(fstr(form, `phase_${img.id}`)) ? fstr(form, `phase_${img.id}`) : '',
+          Number(form.get(`sort_${img.id}`) || 0),
+          img.id,
+        ]);
+      }
+      const cover = Number(form.get('cover') || 0);
+      if (cover) await run('UPDATE works SET cover_image_id = ? WHERE id = ?', [cover, id]);
+      const del = Number(form.get('delete_img') || 0);
+      if (del) {
+        const img = await get<{ variants: string }>('SELECT variants FROM images WHERE id = ? AND work_id = ?', [del, id]);
+        if (img) await deleteVariants(img.variants);
+        await run('DELETE FROM images WHERE id = ? AND work_id = ?', [del, id]);
+        await run('UPDATE works SET cover_image_id = NULL WHERE id = ? AND cover_image_id = ?', [id, del]);
+      }
+      await run("UPDATE works SET updated_at = datetime('now') WHERE id = ?", [id]);
+      return Astro.redirect(ahref(Astro, `/lavori/${id}?ok=saved#foto`), 303);
+    }
+    await saveWork(form, id);
+    return Astro.redirect(ahref(Astro, `/lavori/${id}?ok=saved`), 303);
+  } catch (e) {
+    error = (e as Error).message;
+  }
+}
+
+const work = await get<Work>('SELECT * FROM works WHERE id = ?', [id]);
+if (!work) return Astro.redirect(ahref(Astro, '/lavori'));
+const images = (await all('SELECT * FROM images WHERE work_id = ? ORDER BY sort, id', [id])).map((r) => ({ ...r, v: parseVariants(r.variants) }));
+const site = (process.env.SITE_URL || '').replace(/\/$/, '');
+const missingAlt = images.filter((i) => !String(i.alt).trim()).length;
+---
+
+<Admin title={work.title} section="lavori">
+  <a slot="actions" class="btn btn--sm btn--ghost" href={ahref(Astro, '/lavori')}>← Lavori</a>
+  {work.status === 'published' && <a slot="actions" class="btn btn--sm" href={`${site}/lavori/${work.slug}/`} target="_blank" rel="noopener"><Icon name="eye" size={16} /> Vedi sul sito</a>}
+  {error && <p class="alert alert--error">{error}</p>}
+
+  <div class="layout-2">
+    <div>
+      <form method="post" class="panel" id="dati">
+        <div class="panel__head"><h2>Contenuti</h2></div>
+        <WorkForm work={work} />
+        <div class="save-row"><button class="btn" type="submit" name="action" value="save">Salva contenuti</button></div>
+      </form>
+
+      <section class="panel" id="foto">
+        <div class="panel__head">
+          <h2>Foto ({images.length})</h2>
+        </div>
+        <form method="post" enctype="multipart/form-data" action={`/api/admin/upload?work=${id}&redirect=1`} data-upload={`/api/admin/upload?work=${id}`}>
+          <label class="dropzone" data-dropzone>
+            <Icon name="image" size={36} />
+            <strong>Trascina qui le foto o clicca per sceglierle</strong>
+            <span class="help">JPG, PNG, WebP o HEIC fino a 25 MB. Ridimensionate e ottimizzate in automatico; i dati GPS vengono rimossi.</span>
+            <input type="file" name="files" accept="image/*" multiple class="sr-only" data-files />
+          </label>
+          <p class="progress" role="status" aria-live="polite" data-progress></p>
+          <noscript><button class="btn btn--sm" type="submit">Carica</button></noscript>
+        </form>
+
+        {
+          images.length > 0 && (
+            <form method="post">
+              <input type="hidden" name="action" value="images" />
+              {missingAlt > 0 && <p class="alert alert--error">{missingAlt} foto senza descrizione: aggiungila per accessibilità e SEO (es. “Bagno dopo la ristrutturazione”).</p>}
+              <div class="img-grid">
+                {images.map((img) => (
+                  <div class:list={['img-card', { 'is-cover': Number(work.cover_image_id) === Number(img.id) }]}>
+                    <img src={img.v[0]?.url} alt="" width="240" height="180" loading="lazy" />
+                    <div class="img-card__body">
+                      <label class="sr-only" for={`alt_${img.id}`}>Descrizione foto</label>
+                      <input class="input" id={`alt_${img.id}`} name={`alt_${img.id}`} value={String(img.alt)} placeholder="Descrizione (alt)" maxlength="200" />
+                      <div class="row2">
+                        <label class="sr-only" for={`phase_${img.id}`}>Fase</label>
+                        <select class="select" id={`phase_${img.id}`} name={`phase_${img.id}`}>
+                          <option value="">Galleria</option>
+                          <option value="prima" selected={img.phase === 'prima'}>Prima</option>
+                          <option value="durante" selected={img.phase === 'durante'}>Durante</option>
+                          <option value="dopo" selected={img.phase === 'dopo'}>Dopo</option>
+                        </select>
+                        <label class="sr-only" for={`sort_${img.id}`}>Ordine</label>
+                        <input class="input" id={`sort_${img.id}`} name={`sort_${img.id}`} type="number" value={String(img.sort)} title="Ordine" />
+                      </div>
+                      <div class="img-card__actions">
+                        {Number(work.cover_image_id) === Number(img.id) ? (
+                          <span class="pill pill--brand">Copertina</span>
+                        ) : (
+                          <button class="btn btn--sm btn--ghost" name="cover" value={img.id} type="submit">Copertina</button>
+                        )}
+                        <button class="btn btn--sm btn--danger" name="delete_img" value={img.id} type="submit" aria-label="Elimina foto"><Icon name="trash" size={16} /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div class="save-row"><button class="btn" type="submit">Salva foto</button></div>
+            </form>
+          )
+        }
+        <p class="help">Suggerimento: marca le foto come “Prima” e “Dopo” per mostrare sul sito il confronto con il cursore.</p>
+      </section>
+    </div>
+
+    <aside>
+      <div class="panel">
+        <h2>Pubblicazione</h2>
+        <div class="form-grid pub">
+          <div class="field">
+            <label for="status">Stato</label>
+            <select class="select" id="status" name="status" form="dati">
+              <option value="draft" selected={work.status === 'draft'}>Bozza (non visibile)</option>
+              <option value="published" selected={work.status === 'published'}>Pubblicato</option>
+            </select>
+          </div>
+          <label class="switch-row"><input type="checkbox" name="featured" form="dati" checked={!!Number(work.featured)} /> In evidenza in home page</label>
+          <label class="switch-row"><input type="checkbox" name="is_example" form="dati" checked={!!Number(work.is_example)} /> Contenuto di esempio</label>
+          <div class="field">
+            <label for="sort">Ordine</label>
+            <input class="input" id="sort" name="sort" type="number" form="dati" value={work.sort} />
+          </div>
+          <button class="btn btn--block" type="submit" form="dati" name="action" value="save">Salva e aggiorna</button>
+          {images.length === 0 && <p class="help">Carica almeno una foto prima di pubblicare.</p>}
+        </div>
+      </div>
+      <form method="post" data-confirm="Eliminare definitivamente questo lavoro e tutte le sue foto?">
+        <button class="btn btn--danger btn--sm" type="submit" name="action" value="delete"><Icon name="trash" size={16} /> Elimina lavoro</button>
+      </form>
+    </aside>
+  </div>
+</Admin>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-upload]');
+  if (form) {
+    const input = form.querySelector<HTMLInputElement>('[data-files]')!;
+    const zone = form.querySelector<HTMLElement>('[data-dropzone]')!;
+    const progress = form.querySelector<HTMLElement>('[data-progress]')!;
+    const upload = async (files: FileList | File[]) => {
+      const list = Array.from(files).filter((f) => f.type.startsWith('image/') || /\.heic$/i.test(f.name));
+      let done = 0;
+      const errors: string[] = [];
+      for (const file of list) {
+        progress.textContent = `Caricamento ${done + 1} di ${list.length}: ${file.name}…`;
+        const fd = new FormData();
+        fd.append('files', file);
+        const res = await fetch(form.dataset.upload!, { method: 'POST', body: fd });
+        if (!res.ok) errors.push(`${file.name}: ${(await res.json().catch(() => ({}))).error || res.status}`);
+        done++;
+      }
+      progress.textContent = errors.length ? `Completato con errori: ${errors.join(' · ')}` : 'Caricamento completato!';
+      location.href = location.pathname + '?ok=uploaded#foto';
+    };
+    input.addEventListener('change', () => input.files && upload(input.files));
+    ['dragenter', 'dragover'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.add('is-over'); }));
+    ['dragleave', 'drop'].forEach((ev) => zone.addEventListener(ev, (e) => { e.preventDefault(); zone.classList.remove('is-over'); }));
+    zone.addEventListener('drop', (e) => e.dataTransfer?.files && upload(e.dataTransfer.files));
+  }
+</script>
+
+<style>
+  .save-row {
+    margin-top: 1.25rem;
+  }
+  .row2 {
+    display: grid;
+    grid-template-columns: 1fr 70px;
+    gap: 0.35rem;
+  }
+  .pub {
+    margin-top: 1rem;
+  }
+  #foto .img-grid {
+    margin-top: 1.25rem;
+  }
+</style>

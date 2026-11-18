@@ -1,0 +1,46 @@
+---
+import Base from '../../layouts/Base.astro';
+import { unsubscribe } from '../../lib/newsletter';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'no-store');
+
+// Disiscrizione con un clic: GET dal link nell'email o POST (header List-Unsubscribe-Post dei client email)
+const token = Astro.url.searchParams.get('t') || '';
+let ok = false;
+if (token && (Astro.request.method === 'POST' || Astro.url.searchParams.get('conferma') === '1')) {
+  ok = await unsubscribe(token);
+  if (Astro.request.method === 'POST') return new Response(null, { status: 204 });
+}
+---
+
+<Base title="Annulla iscrizione newsletter" description="Annulla l'iscrizione alla newsletter di Bota s.r.l." noindex>
+  <section class="section">
+    <div class="container container--narrow">
+      {
+        ok ? (
+          <>
+            <h1>Iscrizione annullata</h1>
+            <p class="lead">Non riceverai più le nostre comunicazioni promozionali. Ci dispiace vederti andare via!</p>
+            <a class="btn" href="/">Torna al sito</a>
+          </>
+        ) : token ? (
+          <>
+            <h1>Vuoi annullare l’iscrizione?</h1>
+            <p class="lead">Confermando non riceverai più offerte, coupon e novità da Bota s.r.l.</p>
+            <form method="get">
+              <input type="hidden" name="t" value={token} />
+              <input type="hidden" name="conferma" value="1" />
+              <button class="btn" type="submit">Sì, annulla l’iscrizione</button>
+            </form>
+          </>
+        ) : (
+          <>
+            <h1>Link non valido</h1>
+            <p class="lead">Per annullare l’iscrizione usa il link presente in fondo alle nostre email oppure scrivici a info@bota.srl.</p>
+          </>
+        )
+      }
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <defs>
+    <pattern id="bugnato" width="120" height="50" patternUnits="userSpaceOnUse"><rect width="120" height="50" fill="#cbbfae"/><path d="M0 48h120M60 0v24M0 24h120M120 24v24M0 24v24" stroke="#a89a86" stroke-width="4"/></pattern>
+    <pattern id="net" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#e8742f" opacity=".15"/><path d="M0 0l14 14M14 0L0 14" stroke="#e8742f" stroke-width=".8" opacity=".4"/></pattern>
+  </defs>
+  <rect width="1200" height="900" fill="#dfe8ec"/>
+  <!-- facciata vecchia (destra) e nuova (sinistra) -->
+  <rect x="60" y="120" width="1080" height="700" fill="#e8d9bf"/>
+  <rect x="620" y="120" width="520" height="700" fill="#d6cbb8"/>
+  <g fill="#c4b8a3" opacity=".9"><path d="M700 250c30 10 50 40 30 70s-60 10-70-20 10-60 40-50Z"/><path d="M980 470c40 0 60 30 40 60s-70 20-70-10 0-50 30-50Z"/><path d="M820 640c25 0 50 20 35 45s-60 15-60-10 5-35 25-35Z"/></g>
+  <!-- cornicione -->
+  <rect x="40" y="100" width="1120" height="40" fill="#cbbfae"/><rect x="30" y="80" width="1140" height="24" fill="#b6a993"/>
+  <g fill="#b6a993"><rect x="60" y="140" width="1080" height="10"/></g>
+  <!-- marcapiani -->
+  <rect x="60" y="380" width="1080" height="18" fill="#cbbfae"/><rect x="60" y="600" width="1080" height="14" fill="#cbbfae"/>
+  <!-- bugnato piano terra -->
+  <rect x="60" y="614" width="1080" height="206" fill="url(#bugnato)"/>
+  <!-- finestre ad arco -->
+  <g id="w">
+    <path d="M140 340v-120a55 55 0 0 1 110 0v120Z" fill="#2a3338"/><path d="M130 345v-125a65 65 0 0 1 130 0v125" fill="none" stroke="#cbbfae" stroke-width="14"/>
+    <path d="M195 160v180M140 260h110" stroke="#e8d9bf" stroke-width="4"/>
+  </g>
+  <use href="#w" x="230"/><use href="#w" x="520"/><use href="#w" x="750"/>
+  <g>
+    <rect x="140" y="440" width="110" height="130" fill="#2a3338"/><rect x="118" y="434" width="22" height="142" fill="#4f6b5a"/><rect x="250" y="434" width="22" height="142" fill="#4f6b5a"/><rect x="128" y="424" width="134" height="14" fill="#cbbfae"/>
+    <rect x="370" y="440" width="110" height="130" fill="#2a3338"/><rect x="348" y="434" width="22" height="142" fill="#4f6b5a"/><rect x="480" y="434" width="22" height="142" fill="#4f6b5a"/><rect x="358" y="424" width="134" height="14" fill="#cbbfae"/>
+    <rect x="660" y="440" width="110" height="130" fill="#2a3338"/><rect x="638" y="434" width="22" height="142" fill="#5f6f64"/><rect x="770" y="434" width="22" height="142" fill="#5f6f64"/><rect x="648" y="424" width="134" height="14" fill="#c4b8a3"/>
+    <rect x="890" y="440" width="110" height="130" fill="#2a3338"/><rect x="868" y="434" width="22" height="142" fill="#5f6f64"/><rect x="1000" y="434" width="22" height="142" fill="#5f6f64"/><rect x="878" y="424" width="134" height="14" fill="#c4b8a3"/>
+  </g>
+  <path d="M540 820V700a60 60 0 0 1 120 0v120Z" fill="#6b4a33"/>
+  <!-- ponteggio sul lato da restaurare -->
+  <rect x="620" y="60" width="540" height="760" fill="url(#net)"/>
+  <g stroke="#59626a" stroke-width="8"><path d="M630 60v780M810 60v780M990 60v780M1150 60v780"/></g>
+  <g fill="#c08a4e"><rect x="615" y="300" width="550" height="14"/><rect x="615" y="580" width="550" height="14"/></g>
+  <g stroke="#59626a" stroke-width="3"><path d="M630 314l180 266M810 314l180 266M990 314l160 266"/></g>
+  <!-- rullo -->
+  <g><rect x="520" y="250" width="110" height="34" rx="10" fill="#b4441a"/><path d="M630 267h22v60h-70v40" fill="none" stroke="#59626a" stroke-width="8" stroke-linejoin="round"/><rect x="570" y="360" width="24" height="110" rx="8" fill="#2a3338"/></g>
+  <rect y="820" width="1200" height="80" fill="#ddd5ca"/>
+</svg>
